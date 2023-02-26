@@ -95,12 +95,7 @@ class frame_inicio(tk.Frame):
         
         self._frame = None
         
-    def crear_frame_inicio(self):
-        if self._frame is not None:
-            self._frame.borrar()
-            self._frame = None
-        if self._frame is None:
-            self._frame = frame_inicio(self)
+    
     
    
     
