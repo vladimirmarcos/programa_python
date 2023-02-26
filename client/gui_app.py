@@ -42,6 +42,8 @@ class App(tk.Frame):
         if self._frame is None:
             self._frame = frame_inicio(self)
 
+    
+
     def crear_frame_busqueda_dni(self):
             if self._frame is not None:
                 self._frame.borrar()
