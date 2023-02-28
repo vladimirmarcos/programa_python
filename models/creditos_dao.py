@@ -101,15 +101,22 @@ def guardar_datos_fechas(Fechas_Vencimiento,numero):
         conexion.cursor.execute(sql)
     conexion.cerrar()
         
-def calcular_intereses(valor,cantidad):
-    if (cantidad==1):
-        return valor*1.13
-    elif (cantidad==2):
-        return valor*1.18
-    elif (cantidad==3):
-        return valor*1.23
-    elif (cantidad==4):
-        return valor*1.28
-    elif (cantidad==5):
-        return valor*1.33
-    
+def busquedadni(dni):
+    conexion=ConexionDB()
+    lista_vacia=[]
+    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes"""
+    conexion.cursor.execute(sql)
+    lista_vacia=conexion.cursor.fetchall()
+    conexion.cerrar()
+    print(lista_vacia)
+
+
+
+def busquedanombre(nombre):
+    conexion=ConexionDB()
+    lista_vacia=[]
+    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes"""
+    conexion.cursor.execute(sql)
+    lista_vacia=conexion.cursor.fetchall()
+    conexion.cerrar()
+    print(lista_vacia)

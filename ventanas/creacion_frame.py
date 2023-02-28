@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
 
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -210,7 +210,7 @@ class frame_busqueda_dni(tk.Frame):
 
         #botones
 
-        self.boton_nuevo=tk.Button(self,text="Buscar ")
+        self.boton_nuevo=tk.Button(self,text="buscar",command=self.busqueda_dni)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=4,column=0,padx=10,pady=10)
 
@@ -218,6 +218,12 @@ class frame_busqueda_dni(tk.Frame):
         self.pack_forget()
         self.destroy()
 
+    def busqueda_dni(self):
+        lista_clientes=[]
+        dni=self.mi_dni.get()
+        busquedadni(dni)
+        
+        
 
 class frame_busqueda_nombre(tk.Frame):
     def __init__(self, parent):
@@ -238,9 +244,15 @@ class frame_busqueda_nombre(tk.Frame):
 
          #botones
 
-        self.boton_nuevo=tk.Button(self,text="Buscar ")
+        self.boton_nuevo=tk.Button(self,text="Buscar ",command=self.busqueda_nombre)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=4,column=0,padx=10,pady=10)
+
+    def busqueda_nombre(self):
+        lista_clientes=[]
+        nombre=self.mi_nombre.get()
+        busquedanombre(nombre)
+
 
     def borrar(self):
         self.pack_forget()
