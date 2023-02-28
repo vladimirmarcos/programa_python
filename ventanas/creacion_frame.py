@@ -2,13 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
 
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.pack(fill=tk.BOTH, expand=tk.YES)
         
         self.campos_creditos()
-        
+        self.desahabilitar_campos()
         #self.abrirventana2()
 
     def campos_creditos(self):
@@ -34,13 +35,16 @@ class frame_inicio(tk.Frame):
         self.label_producto.config(font=('Arial',12,'bold'))
         self.label_producto.grid(row=4,column=0,padx=10,pady=10)
 
-        self.label_cuotas=tk.Label(self,text='cuotas')
-        self.label_cuotas.config(font=('Arial',12,'bold'))
-        self.label_cuotas.grid(row=5,column=0,padx=10,pady=10)
 
         self.label_monto=tk.Label(self,text='Monto')
         self.label_monto.config(font=('Arial',12,'bold'))
-        self.label_monto.grid(row=6,column=0,padx=10,pady=10)
+        self.label_monto.grid(row=5,column=0,padx=10,pady=10)
+
+        self.label_cuotas=tk.Label(self,text='cuotas')
+        self.label_cuotas.config(font=('Arial',12,'bold'))
+        self.label_cuotas.grid(row=6,column=0,padx=10,pady=10)
+
+       
 
         #Entrys de cada Campo
 
@@ -71,42 +75,122 @@ class frame_inicio(tk.Frame):
         self.entry_producto.config(width=50,font=('Arial',12))
         self.entry_producto.grid(row=4,column=1,padx=10,pady=10,columnspan=2)
 
-        self.mi_cuotas=tk.StringVar()
-        self.entry_cuotas=tk.Entry(self,textvariable=self.mi_cuotas)
-        self.entry_cuotas.config(width=50,font=('Arial',12))
-        self.entry_cuotas.grid(row=5,column=1,padx=10,pady=10,columnspan=2)
 
         self.mi_monto=tk.StringVar()
         self.entry_monto=tk.Entry(self,textvariable=self.mi_monto)
         self.entry_monto.config(width=50,font=('Arial',12))
-        self.entry_monto.grid(row=6,column=1,padx=10,pady=10,columnspan=2) 
+        self.entry_monto.grid(row=5,column=1,padx=10,pady=10,columnspan=2) 
+
+        self.mi_cuotas=tk.StringVar()
+        self.entry_cuotas=tk.Entry(self,textvariable=self.mi_cuotas)
+        self.entry_cuotas.config(width=50,font=('Arial',12))
+        self.entry_cuotas.grid(row=6,column=1,padx=10,pady=10,columnspan=2)
+
+        
 
 
          #botones
 
-        self.boton_nuevo=tk.Button(self,text="Nuevo Credito")
+        self.boton_nuevo=tk.Button(self,text="Nuevo Credito",command=self.habilitar_campos)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
 
-        self.boton_guardar=tk.Button(self,text="Generar",command="self.crear_frame_final_datos")
+        self.boton_guardar=tk.Button(self,text="Generar",command=self.guardar_datos)
         self.boton_guardar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#BD152E',cursor='pirate',activebackground='#E15370')
         self.boton_guardar.grid(row=7,column=1,padx=10,pady=10)
+
+        self.boton_guardar=tk.Button(self,text="tabla",command=crear_tabla)
+        self.boton_guardar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#BD152E',cursor='pirate',activebackground='#E15370')
+        self.boton_guardar.grid(row=7,column=2,padx=10,pady=10)
         
         
         self._frame = None
+
+    def guardar_datos (self):
+
+        dato_persona=Datos_Personas(
+            self.mi_nombre.get(),
+            self.mi_dni.get(),
+            self.mi_garante.get(),
+            self.mi_contacto.get(),
+            self.mi_producto.get(),
+            self.mi_monto.get(),
+            self.mi_cuotas.get(),
+            1
+        )    
         
-    
-    
-   
+        guardar_datos_personas(dato_persona)
+        monto=float(self.mi_monto.get())
+        numero_cuota=int(self.mi_cuotas.get())
+        total=self.calcular_intereses(monto,numero_cuota)
+        print(total)
+        cuota=total/numero_cuota
+        print(cuota)
+        dato_fechas=Fechas_Vencimiento(
+            "02/01/22",
+            cuota,
+            0.5,
+            cuota,
+            1
+            
+
+
+        )
+        numero=int(self.mi_cuotas.get())
+        guardar_datos_fechas(dato_fechas,numero)
+        self.desahabilitar_campos()
     
 
     def borrar(self):
         self.pack_forget()
         self.destroy()
+
+    def habilitar_campos(self):
         
 
+        self.entry_nombre.config(state='normal')
+        self.entry_dni.config(state='normal')
+        self.entry_garante.config(state='normal')
+        self.entry_contacto.config(state='normal')
+        self.entry_producto.config(state='normal')
+        self.entry_cuotas.config(state='normal')
+        self.entry_monto.config(state='normal')
 
+        self.boton_guardar.config(state='normal')
+    def desahabilitar_campos(self):
+        self.mi_nombre.set('')
+        self.mi_dni.set('')
+        self.mi_garante.set('')
+        self.mi_contacto.set('')
+        self.mi_producto.set('')
+        self.mi_cuotas.set('')
+        self.mi_monto.set('')
 
+        self.entry_nombre.config(state='disabled')
+        self.entry_dni.config(state='disabled')
+        self.entry_garante.config(state='disabled')
+        self.entry_contacto.config(state='disabled')
+        self.entry_producto.config(state='disabled')
+        self.entry_cuotas.config(state='disabled')
+        self.entry_monto.config(state='disabled')
+
+        self.boton_guardar.config(state='disabled')
+
+    def calcular_intereses(self,valor,cantidad):
+        if (cantidad==1):
+            print(valor*1.13)
+            return valor*1.13
+        elif (cantidad==2):
+            print(valor*1.18)
+            return valor*1.18
+        elif (cantidad==3):
+            print(valor*1.23)
+            return valor*1.23
+        elif (cantidad==4):
+            return valor*1.28
+        elif (cantidad==5):
+            return valor*1.33
+          
 class frame_busqueda_dni(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
