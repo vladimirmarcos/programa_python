@@ -218,10 +218,14 @@ class frame_busqueda_dni(tk.Frame):
         self.pack_forget()
         self.destroy()
 
+    
+
     def busqueda_dni(self):
         lista_clientes=[]
         dni=self.mi_dni.get()
         busquedadni(dni)
+        self.mi_dni.set('')
+        
         
         
 
@@ -252,6 +256,12 @@ class frame_busqueda_nombre(tk.Frame):
         lista_clientes=[]
         nombre=self.mi_nombre.get()
         busquedanombre(nombre)
+        self.mi_nombre.set('')
+
+
+    
+        
+        
 
 
     def borrar(self):

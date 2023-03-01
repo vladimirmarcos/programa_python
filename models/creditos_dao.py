@@ -104,7 +104,7 @@ def guardar_datos_fechas(Fechas_Vencimiento,numero):
 def busquedadni(dni):
     conexion=ConexionDB()
     lista_vacia=[]
-    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes"""
+    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni='{dni}'"""
     conexion.cursor.execute(sql)
     lista_vacia=conexion.cursor.fetchall()
     conexion.cerrar()
@@ -115,7 +115,8 @@ def busquedadni(dni):
 def busquedanombre(nombre):
     conexion=ConexionDB()
     lista_vacia=[]
-    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes"""
+    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre='{nombre}'
+    """
     conexion.cursor.execute(sql)
     lista_vacia=conexion.cursor.fetchall()
     conexion.cerrar()
