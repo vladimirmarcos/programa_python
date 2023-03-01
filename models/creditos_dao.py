@@ -1,6 +1,6 @@
 from .conexion_db import ConexionDB
 from tkinter import messagebox
-
+import datetime
 def crear_tabla():
     conexion=ConexionDB()
     
@@ -93,7 +93,15 @@ def guardar_datos_personas(Datos_Personas):
 
 def guardar_datos_fechas(Fechas_Vencimiento,numero):
     conexion=ConexionDB()
-    for fecha in range (numero+1): 
+    dia_delta=datetime.timedelta(days=31)
+    Fechas_Vencimiento.fecha= Fechas_Vencimiento.fecha+dia_delta
+    sql=f"""INSERT INTO fecha_vencimientos (fecha,monto_base,recargos,total,estado)
+        VALUES ('{Fechas_Vencimiento.fecha}','{Fechas_Vencimiento.monto_base}','{Fechas_Vencimiento.recargos}','{Fechas_Vencimiento.total}','{Fechas_Vencimiento.estado}')
+    
+        """
+    conexion.cursor.execute(sql)
+    for fecha in range (numero-1): 
+        Fechas_Vencimiento.fecha= Fechas_Vencimiento.fecha+dia_delta
         sql=f"""INSERT INTO fecha_vencimientos (fecha,monto_base,recargos,total,estado)
         VALUES ('{Fechas_Vencimiento.fecha}','{Fechas_Vencimiento.monto_base}','{Fechas_Vencimiento.recargos}','{Fechas_Vencimiento.total}','{Fechas_Vencimiento.estado}')
     

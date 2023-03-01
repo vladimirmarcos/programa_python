@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
-
+import datetime
 from models.creditos_dao import Datos_Personas,guardar_datos_personas,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
@@ -123,11 +123,11 @@ class frame_inicio(tk.Frame):
         monto=float(self.mi_monto.get())
         numero_cuota=int(self.mi_cuotas.get())
         total=self.calcular_intereses(monto,numero_cuota)
-        print(total)
+        fecha_actual=datetime.datetime.today()
         cuota=total/numero_cuota
-        print(cuota)
+        
         dato_fechas=Fechas_Vencimiento(
-            "02/01/22",
+            fecha_actual,
             cuota,
             0.5,
             cuota,
@@ -155,8 +155,9 @@ class frame_inicio(tk.Frame):
         self.entry_producto.config(state='normal')
         self.entry_cuotas.config(state='normal')
         self.entry_monto.config(state='normal')
-
         self.boton_guardar.config(state='normal')
+
+
     def desahabilitar_campos(self):
         self.mi_nombre.set('')
         self.mi_dni.set('')
