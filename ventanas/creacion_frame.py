@@ -108,7 +108,7 @@ class frame_inicio(tk.Frame):
         self._frame = None
 
     def guardar_datos (self):
-
+      try:
 
         monto=float(self.mi_monto.get())
         numero_cuota=int(self.mi_cuotas.get())
@@ -150,7 +150,10 @@ class frame_inicio(tk.Frame):
         numero=int(self.mi_cuotas.get())
         guardar_datos_fechas(dato_fechas,numero)
         self.desahabilitar_campos()
-    
+      except:
+        titulo=" error al registrar el pago"
+        mensaje= "Verifique los campos, puede que falte alguno o que algun campo no fue llenado con su tipo valido" 
+        messagebox.showerror(titulo,mensaje)
 
     def borrar(self):
         self.pack_forget()
@@ -317,10 +320,11 @@ class frame_pagos(tk.Frame):
         self.boton_nuevo=tk.Button(self,text="Enviar",command=self.enviar_cuotas)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
-
+    def lista_vacia(self,lista):
+        return not lista
     def prueba(self,ide):
         conexion=ConexionDB()
-        sql=f"""SELECT fecha,monto_base,fecha_id FROM fecha_vencimientos WHERE idcliente='{ide} '"""
+        sql=f"""SELECT fecha,monto_base,fecha_id FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
         conexion.cursor.execute(sql)
         algo=[]
         algo=conexion.cursor.fetchall()
@@ -329,31 +333,35 @@ class frame_pagos(tk.Frame):
     def enviar_cuotas(self):
         ide=self.mi_id.get()
         algo=self.prueba(ide)
-        algo_1=algo[1]
-        algo_2=list(algo_1)
-        fecha=algo_2[0]
-        monto=float(algo_2[1])
-        fechaid=int(algo_2[2])
-        fecha_actual=str(datetime.datetime.today())
         
-        if (fecha<fecha_actual):
-            monto=monto*1.13
-            fecha_actual=datetime.datetime.today()
-            pagare=Pagos(fecha_actual,monto,fechaid,int(ide))
-            print("enviando datos")
-            pagos_cuotas(pagare)
+        
+        if (self.lista_vacia(algo)== False ):
+            algo_1=algo[0]
+            algo_2=list(algo_1)
+            fecha=algo_2[0]
+            monto=float(algo_2[1])
+            fechaid=int(algo_2[2])
+            fecha_actual=str(datetime.datetime.today())
+        
+            if (fecha<fecha_actual):
+                monto=monto*1.13
+                fecha_actual=datetime.datetime.today()
+                pagare=Pagos(fecha_actual,monto,fechaid,int(ide))
+                pagos_cuotas(pagare,fechaid)
            
+            else:
+                fecha_actual=datetime.datetime.today()
+                ide=int(ide)
+                pagare=Pagos(fecha_actual,monto,fechaid,ide)
+                pagos_cuotas(pagare,fechaid)
+            self.mi_id.set('')
+            self.mi_cuotas.set('')
         else:
-            fecha_actual=datetime.datetime.today()
-            ide=int(ide)
-            pagare=Pagos(fecha_actual,monto,fechaid,ide)
-            print("enviando datos")
-            print(pagare.fecha_id)
-            print (pagare.monto_pagado)
-            print(pagare.id_cliente)
-            pagos_cuotas(pagare)
-        self.mi_id.set('')
-        self.mi_cuotas.set('')
+            titulo=" error al registrar el pago"
+            mensaje= "el ide no registra más cuotas a pagar" 
+            messagebox.showerror(titulo,mensaje)
+            self.mi_id.set('')
+            self.mi_cuotas.set('')
     def borrar(self):
         self.pack_forget()
         self.destroy()

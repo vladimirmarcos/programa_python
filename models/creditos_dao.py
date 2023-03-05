@@ -130,22 +130,24 @@ def guardar_datos_fechas(Fechas_Vencimiento,numero):
         """
         conexion.cursor.execute(sql)
     conexion.cerrar()
-def pagos_cuotas(Pagos):
+def pagos_cuotas(Pagos,fecha_id):
     conexion=ConexionDB()
 
     sql=f"""INSERT INTO pagos (fecha_pago,monto_pagado,fecha_id,id_cliente)
     VALUES ('{Pagos.fecha_pago}','{Pagos.monto_pagado}','{Pagos.fecha_id}','{Pagos.id_cliente}')
     
     """
-    
+    sql_2=f"""update fecha_vencimientos set estado=0 where fecha_id='{fecha_id}'
+    """
     try:
         conexion.cursor.execute(sql)
+        conexion.cursor.execute(sql_2)
         conexion.cerrar()
         
     except:
-      titulo=" error al registrar el pago"
-      mensaje= "Verifique los campos, puede que falte alguno o que algun campo no fue llenado con su tipo valido"
-      messagebox.showerror(titulo,mensaje)
+        titulo=" error al registrar el pago"
+        mensaje= "Verifique los campos, puede que falte alguno o que algun campo no fue llenado con su tipo valido" 
+        messagebox.showerror(titulo,mensaje)
     
 
 def busquedadni(dni):
