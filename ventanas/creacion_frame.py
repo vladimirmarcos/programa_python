@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
 import datetime
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre
+from models.conexion_db import ConexionDB
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -108,6 +109,10 @@ class frame_inicio(tk.Frame):
 
     def guardar_datos (self):
 
+
+        monto=float(self.mi_monto.get())
+        numero_cuota=int(self.mi_cuotas.get())
+        total=self.calcular_intereses(monto,numero_cuota)
         dato_persona=Datos_Personas(
             self.mi_nombre.get(),
             self.mi_dni.get(),
@@ -115,23 +120,29 @@ class frame_inicio(tk.Frame):
             self.mi_contacto.get(),
             self.mi_producto.get(),
             self.mi_monto.get(),
+            total,
             self.mi_cuotas.get(),
             1
         )    
         
         guardar_datos_personas(dato_persona)
-        monto=float(self.mi_monto.get())
-        numero_cuota=int(self.mi_cuotas.get())
-        total=self.calcular_intereses(monto,numero_cuota)
         fecha_actual=datetime.datetime.today()
         cuota=total/numero_cuota
-        
+        conexion=ConexionDB()
+        sql=f"""SELECT max(id_clientes) FROM datos_clientes """
+        conexion.cursor.execute(sql)
+        algo=[]
+        algo=conexion.cursor.fetchall()
+        algo_1=algo[0]
+        algo_2=list(algo_1)
+        id_cliente=algo_2[0]
+        conexion.cerrar()
         dato_fechas=Fechas_Vencimiento(
             fecha_actual,
             cuota,
-            0.5,
-            cuota,
-            1
+            1,
+            1,
+            id_cliente
             
 
 
@@ -228,8 +239,6 @@ class frame_busqueda_dni(tk.Frame):
         self.mi_dni.set('')
         
         
-        
-
 class frame_busqueda_nombre(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -278,12 +287,73 @@ class frame_pagos(tk.Frame):
         self.campos_creditos_pagos()
 
     def campos_creditos_pagos(self):
-        self.label_nombre=tk.Label(self,text='va algo para saber que cambio pagos')
-        self.label_nombre.config(font=('Arial',12,'bold'))
-        self.label_nombre.grid(row=0,column=0,padx=10,pady=10)
-
         
 
+        #label de campos
+        self.label_id=tk.Label(self,text='id del cliente')
+        self.label_id.config(font=('Arial',12,'bold'))
+        self.label_id.grid(row=0,column=0,padx=10,pady=10)
+
+        self.label_cuotas=tk.Label(self,text='cantidad de cuotas')
+        self.label_cuotas.config(font=('Arial',12,'bold'))
+        self.label_cuotas.grid(row=1,column=0,padx=10,pady=10)
+
+
+         #Entrys de cada Campo
+
+        self.mi_id=tk.StringVar()
+        self.entry_id=tk.Entry(self,textvariable=self.mi_id)
+        self.entry_id.config(width=50,font=('Arial',12))
+        self.entry_id.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+        print(self.mi_id)
+        self.mi_cuotas=tk.StringVar()
+        self.entry_cuotas=tk.Entry(self,textvariable=self.mi_cuotas)
+        self.entry_cuotas.config(width=50,font=('Arial',12))
+        self.entry_cuotas.grid(row=1,column=1,padx=10,pady=10,columnspan=2)
+
+
+          #botones
+
+        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.enviar_cuotas)
+        self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+        self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
+
+    def prueba(self,ide):
+        conexion=ConexionDB()
+        sql=f"""SELECT fecha,monto_base,fecha_id FROM fecha_vencimientos WHERE idcliente='{ide} '"""
+        conexion.cursor.execute(sql)
+        algo=[]
+        algo=conexion.cursor.fetchall()
+        conexion.cerrar()
+        return (algo)
+    def enviar_cuotas(self):
+        ide=self.mi_id.get()
+        algo=self.prueba(ide)
+        algo_1=algo[1]
+        algo_2=list(algo_1)
+        fecha=algo_2[0]
+        monto=float(algo_2[1])
+        fechaid=int(algo_2[2])
+        fecha_actual=str(datetime.datetime.today())
+        
+        if (fecha<fecha_actual):
+            monto=monto*1.13
+            fecha_actual=datetime.datetime.today()
+            pagare=Pagos(fecha_actual,monto,fechaid,int(ide))
+            print("enviando datos")
+            pagos_cuotas(pagare)
+           
+        else:
+            fecha_actual=datetime.datetime.today()
+            ide=int(ide)
+            pagare=Pagos(fecha_actual,monto,fechaid,ide)
+            print("enviando datos")
+            print(pagare.fecha_id)
+            print (pagare.monto_pagado)
+            print(pagare.id_cliente)
+            pagos_cuotas(pagare)
+        self.mi_id.set('')
+        self.mi_cuotas.set('')
     def borrar(self):
         self.pack_forget()
         self.destroy()
