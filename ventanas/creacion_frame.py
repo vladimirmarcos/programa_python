@@ -111,16 +111,16 @@ class frame_inicio(tk.Frame):
       try:
         nombre=self.mi_nombre.get()
         nombre=nombre.lower()
-        nombre=nombre.rstrip()   
+        nombre=nombre.strip()   
         garante=self.mi_garante.get() 
         garante=garante.lower()
-        garante=garante.rstrip()
+        garante=garante.strip()
         contacto=self.mi_contacto.get()
         contacto=contacto.lower()
-        contacto=contacto.rstrip()
+        contacto=contacto.strip()
         producto=self.mi_producto.get()
         producto=producto.lower()
-        producto=producto.rstrip()
+        producto=producto.strip()
         monto=float(self.mi_monto.get())
         numero_cuota=int(self.mi_cuotas.get())
         total=self.calcular_intereses(monto,numero_cuota)
@@ -279,6 +279,11 @@ class frame_busqueda_nombre(tk.Frame):
     def busqueda_nombre(self):
         lista_clientes=[]
         nombre=self.mi_nombre.get()
+        
+        
+        nombre=nombre.lower()
+        
+        nombre=nombre.strip()
         busquedanombre(nombre)
         self.mi_nombre.set('')
 
