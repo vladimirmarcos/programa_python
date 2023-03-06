@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox,Menu
 import datetime
 from models.conexion_db import ConexionDB
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -109,16 +109,27 @@ class frame_inicio(tk.Frame):
 
     def guardar_datos (self):
       try:
-
+        nombre=self.mi_nombre.get()
+        nombre=nombre.lower()
+        nombre=nombre.rstrip()   
+        garante=self.mi_garante.get() 
+        garante=garante.lower()
+        garante=garante.rstrip()
+        contacto=self.mi_contacto.get()
+        contacto=contacto.lower()
+        contacto=contacto.rstrip()
+        producto=self.mi_producto.get()
+        producto=producto.lower()
+        producto=producto.rstrip()
         monto=float(self.mi_monto.get())
         numero_cuota=int(self.mi_cuotas.get())
         total=self.calcular_intereses(monto,numero_cuota)
         dato_persona=Datos_Personas(
-            self.mi_nombre.get(),
+            nombre,
             self.mi_dni.get(),
-            self.mi_garante.get(),
-            self.mi_contacto.get(),
-            self.mi_producto.get(),
+            garante,
+            contacto,
+            producto,
             self.mi_monto.get(),
             total,
             self.mi_cuotas.get(),
@@ -297,9 +308,6 @@ class frame_pagos(tk.Frame):
         self.label_id.config(font=('Arial',12,'bold'))
         self.label_id.grid(row=0,column=0,padx=10,pady=10)
 
-        self.label_cuotas=tk.Label(self,text='cantidad de cuotas')
-        self.label_cuotas.config(font=('Arial',12,'bold'))
-        self.label_cuotas.grid(row=1,column=0,padx=10,pady=10)
 
 
          #Entrys de cada Campo
@@ -308,11 +316,7 @@ class frame_pagos(tk.Frame):
         self.entry_id=tk.Entry(self,textvariable=self.mi_id)
         self.entry_id.config(width=50,font=('Arial',12))
         self.entry_id.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
-        print(self.mi_id)
-        self.mi_cuotas=tk.StringVar()
-        self.entry_cuotas=tk.Entry(self,textvariable=self.mi_cuotas)
-        self.entry_cuotas.config(width=50,font=('Arial',12))
-        self.entry_cuotas.grid(row=1,column=1,padx=10,pady=10,columnspan=2)
+       
 
 
           #botones
@@ -354,14 +358,20 @@ class frame_pagos(tk.Frame):
                 ide=int(ide)
                 pagare=Pagos(fecha_actual,monto,fechaid,ide)
                 pagos_cuotas(pagare,fechaid)
+            if (len(algo)-1==0):
+                ide=int(ide)
+                fin_credito(ide)
+                   
+                
             self.mi_id.set('')
-            self.mi_cuotas.set('')
+            
+
         else:
             titulo=" error al registrar el pago"
-            mensaje= "el ide no registra más cuotas a pagar" 
+            mensaje= "el cliente no registra más cuotas a pagar" 
             messagebox.showerror(titulo,mensaje)
             self.mi_id.set('')
-            self.mi_cuotas.set('')
+            
     def borrar(self):
         self.pack_forget()
         self.destroy()

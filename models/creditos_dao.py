@@ -152,26 +152,48 @@ def pagos_cuotas(Pagos,fecha_id):
 
 def busquedadni(dni):
     conexion=ConexionDB()
-    lista_vacia=[]
-    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni='{dni}'"""
-    conexion.cursor.execute(sql)
-    lista_vacia=conexion.cursor.fetchall()
-    algo=lista_vacia[(0)]
+    try:
+        lista_vacia=[]
+        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni='{dni}' AND estado =1"""
+        conexion.cursor.execute(sql)
+        lista_vacia=conexion.cursor.fetchall()
+        algo=lista_vacia[(0)]
     
-    print(lista_vacia[(0)])
+        print(lista_vacia[(0)])
     
-    #print(lista_vacia(0))
-    conexion.cerrar()
-    
+        #print(lista_vacia(0))
+        conexion.cerrar()
+    except:
+        titulo=" error al buscar credito"
+        mensaje= "el dni ingresado no esta asociado a ningún credito" 
+        messagebox.showerror(titulo,mensaje)
 
+    
+def fin_credito(id_cliente):
+    conexion=ConexionDB()
+    sql_2=f"""update datos_clientes set estado=0 where id_clientes='{id_cliente}'
+    """
+    
+    
+    conexion.cursor.execute(sql_2)
+    conexion.cerrar()
 
 
 def busquedanombre(nombre):
-    conexion=ConexionDB()
-    lista_vacia=[]
-    sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre='{nombre}'
+    try:
+        conexion=ConexionDB()
+        lista_vacia=[]
+        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre='{nombre}' AND estado =1
     """
-    conexion.cursor.execute(sql)
-    lista_vacia=conexion.cursor.fetchall()
-    conexion.cerrar()
-    print(lista_vacia)
+        conexion.cursor.execute(sql)
+        lista_vacia=conexion.cursor.fetchall()
+        algo=lista_vacia[(0)]
+    
+        print(lista_vacia[(0)])
+        conexion.cerrar()
+       
+
+    except:
+         titulo=" error al buscar credito"
+         mensaje= "el nombre ingresado no esta asociado a ningún credito" 
+         messagebox.showerror(titulo,mensaje)
