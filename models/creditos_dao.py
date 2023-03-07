@@ -201,7 +201,7 @@ def busquedanombre(nombre):
          messagebox.showerror(titulo,mensaje)
 
 
-def eliminar_todas_cuotas(ide,cuotas):
+def eliminar_todas_cuotas(ide):
     conexion=ConexionDB()
 
     sql=f"""SELECT monto_base,al_dia FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
@@ -209,10 +209,17 @@ def eliminar_todas_cuotas(ide,cuotas):
     conexion.cursor.execute(sql)
     algo=[]
     algo=conexion.cursor.fetchall()
-    conexion.cerrar()
+    
+    
+    cuotas_restantes=len(algo)
+    """if (cuotas_restantes==0):
+        cuotas_restantes=cuotas"""
+        
+    
+    
     if (lista_vacia(algo)== False ):
             
-            for i in range(cuotas):
+           for i in range(cuotas_restantes):
                 algo_1=algo[i]
                 algo_2=list(algo_1)
                 al_dia=algo_2[1]
@@ -221,8 +228,12 @@ def eliminar_todas_cuotas(ide,cuotas):
                  total=total+monto
                 else: 
                     total=total+monto*1.13
-            print ("el cliente debe un total de ")
-            print(total)
+           print ("el cliente debe un total de ")
+           print(total)
+           sql_2=f"""update fecha_vencimientos set estado=0 where idcliente='{ide}'
+    """
+           conexion.cursor.execute(sql_2)
+           conexion.cerrar()
                     
     else: 
         print("se la debo")

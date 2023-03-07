@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox,Menu
 import datetime
 from models.conexion_db import ConexionDB
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,eliminar_todas_cuotas
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,eliminar_todas_cuotas,lista_vacia
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -329,8 +329,7 @@ class frame_pagos(tk.Frame):
         self.boton_nuevo=tk.Button(self,text="Enviar",command=self.enviar_cuotas)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
-    def lista_vacia(self,lista):
-        return not lista
+   
     def buscar_id(self,ide):
         conexion=ConexionDB()
         sql=f"""SELECT fecha,monto_base,fecha_id FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
@@ -344,7 +343,7 @@ class frame_pagos(tk.Frame):
         algo=self.buscar_id(ide)
         
         
-        if (self.lista_vacia(algo)== False ):
+        if (lista_vacia(algo)== False ):
             algo_1=algo[0]
             algo_2=list(algo_1)
             fecha=algo_2[0]
@@ -508,45 +507,43 @@ class frame_eliminar_credito(tk.Frame):
 
           #botones
 
-        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.borrar)
+        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.borrar_cliente)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
      
-     def lista_vacia(self,lista):
-         return not lista
      
-
      def buscar_id(self,ide):
         conexion=ConexionDB()
         sql=f"""SELECT cuota FROM datos_clientes WHERE id_clientes='{ide}' AND estado=1"""
         conexion.cursor.execute(sql)
-        algo=[]
-        algo=conexion.cursor.fetchall()
+        lista_cliente_a_eliminar=[]
+        lista_cliente_a_eliminar=conexion.cursor.fetchall()
         conexion.cerrar()
-        return (algo)
+        return (lista_cliente_a_eliminar)
      
-     def borrar(self):
-        ide=self.mi_id.get()
-        algo=self.buscar_id(ide)
+     def borrar_cliente(self):
+        id_cliente_a_eliminar=self.mi_id.get()
+        lista_cliente_a_eliminar=self.buscar_id(id_cliente_a_eliminar)
         
-        if (self.lista_vacia(algo)== False ):
-            algo_1=algo[0]
-            algo_2=list(algo_1)
-            cuotas=algo_2[0]
-            fin_credito(ide)
-            eliminar_todas_cuotas(ide,cuotas)
-        
+        if (lista_vacia(lista_cliente_a_eliminar)== False ):
             
-           
+            fin_credito(id_cliente_a_eliminar)
+            eliminar_todas_cuotas(id_cliente_a_eliminar)
             
-            
-                   
                 
             self.mi_id.set('')
             
-
         else:
             titulo=" error al borrar el credito"
             mensaje= "No se registro ningun cliente con ese id " 
             messagebox.showerror(titulo,mensaje)
             self.mi_id.set('')
+
+class frame_valicion_eliminacion(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.pack(fill=tk.BOTH, expand=tk.YES)
+        self.campos_creditos_pagos()
+    def borrar(self):
+        self.pack_forget()
+        self.destroy()
