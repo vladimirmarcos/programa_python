@@ -154,7 +154,7 @@ def busquedadni(dni):
     conexion=ConexionDB()
     try:
         lista_vacia=[]
-        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni='{dni}' AND estado =1"""
+        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni like '%{dni}%' AND estado =1"""
         conexion.cursor.execute(sql)
         lista_vacia=conexion.cursor.fetchall()
         algo=lista_vacia[(0)]
@@ -183,13 +183,15 @@ def busquedanombre(nombre):
     try:
         conexion=ConexionDB()
         lista_vacia=[]
-        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre='{nombre}' AND estado =1
+        variable="%"
+        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre like '%{nombre}%' AND estado =1
     """
         conexion.cursor.execute(sql)
         lista_vacia=conexion.cursor.fetchall()
         algo=lista_vacia[(0)]
+        print(algo)
     
-        print(lista_vacia[(0)])
+       
         conexion.cerrar()
        
 
