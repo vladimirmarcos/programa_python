@@ -197,3 +197,32 @@ def busquedanombre(nombre):
          titulo=" error al buscar credito"
          mensaje= "el nombre ingresado no esta asociado a ningún credito" 
          messagebox.showerror(titulo,mensaje)
+
+
+def eliminar_todas_cuotas(ide,cuotas):
+    conexion=ConexionDB()
+
+    sql=f"""SELECT monto_base,al_dia FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
+    total=0.0
+    conexion.cursor.execute(sql)
+    algo=[]
+    algo=conexion.cursor.fetchall()
+    conexion.cerrar()
+    if (lista_vacia(algo)== False ):
+            
+            for i in range(cuotas):
+                algo_1=algo[i]
+                algo_2=list(algo_1)
+                al_dia=algo_2[1]
+                monto=algo_2[0]
+                if(al_dia):
+                 total=total+monto
+                else: 
+                    total=total+monto*1.13
+            print ("el cliente debe un total de ")
+            print(total)
+                    
+    else: 
+        print("se la debo")
+def lista_vacia(lista):
+        return not lista

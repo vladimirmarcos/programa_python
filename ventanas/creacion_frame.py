@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox,Menu
 import datetime
 from models.conexion_db import ConexionDB
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,eliminar_todas_cuotas
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -331,7 +331,7 @@ class frame_pagos(tk.Frame):
         self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
     def lista_vacia(self,lista):
         return not lista
-    def prueba(self,ide):
+    def buscar_id(self,ide):
         conexion=ConexionDB()
         sql=f"""SELECT fecha,monto_base,fecha_id FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
         conexion.cursor.execute(sql)
@@ -341,7 +341,7 @@ class frame_pagos(tk.Frame):
         return (algo)
     def enviar_cuotas(self):
         ide=self.mi_id.get()
-        algo=self.prueba(ide)
+        algo=self.buscar_id(ide)
         
         
         if (self.lista_vacia(algo)== False ):
@@ -479,3 +479,74 @@ class frame_informe_B(tk.Frame):
         self.destroy()     
 
 
+class frame_eliminar_credito(tk.Frame):
+     def __init__(self, parent):
+        super().__init__(parent)
+        self.pack(fill=tk.BOTH, expand=tk.YES)
+        self.campos_creditos_pagos()
+     def borrar(self):
+        self.pack_forget()
+        self.destroy()
+     def campos_creditos_pagos(self):
+        
+
+        #label de campos
+        self.label_id=tk.Label(self,text='id del cliente')
+        self.label_id.config(font=('Arial',12,'bold'))
+        self.label_id.grid(row=0,column=0,padx=10,pady=10)
+
+
+
+         #Entrys de cada Campo
+
+        self.mi_id=tk.StringVar()
+        self.entry_id=tk.Entry(self,textvariable=self.mi_id)
+        self.entry_id.config(width=50,font=('Arial',12))
+        self.entry_id.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+       
+
+
+          #botones
+
+        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.borrar)
+        self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+        self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
+     
+     def lista_vacia(self,lista):
+         return not lista
+     
+
+     def buscar_id(self,ide):
+        conexion=ConexionDB()
+        sql=f"""SELECT cuota FROM datos_clientes WHERE id_clientes='{ide}' AND estado=1"""
+        conexion.cursor.execute(sql)
+        algo=[]
+        algo=conexion.cursor.fetchall()
+        conexion.cerrar()
+        return (algo)
+     
+     def borrar(self):
+        ide=self.mi_id.get()
+        algo=self.buscar_id(ide)
+        
+        if (self.lista_vacia(algo)== False ):
+            algo_1=algo[0]
+            algo_2=list(algo_1)
+            cuotas=algo_2[0]
+            fin_credito(ide)
+            eliminar_todas_cuotas(ide,cuotas)
+        
+            
+           
+            
+            
+                   
+                
+            self.mi_id.set('')
+            
+
+        else:
+            titulo=" error al borrar el credito"
+            mensaje= "No se registro ningun cliente con ese id " 
+            messagebox.showerror(titulo,mensaje)
+            self.mi_id.set('')
