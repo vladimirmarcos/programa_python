@@ -525,18 +525,20 @@ class frame_eliminar_credito(tk.Frame):
      def verificacion_borrar_cliente(self):
         self.id_cliente_a_eliminar=self.mi_id.get()
         lista_cliente_a_eliminar=self.buscar_id(self.id_cliente_a_eliminar)
-        lista_cliente_a_eliminar=list(lista_cliente_a_eliminar[0])
         
         
-        nombre=lista_cliente_a_eliminar[0]
-        dni=lista_cliente_a_eliminar[1]
-        garante=lista_cliente_a_eliminar[2]
-        contacto=lista_cliente_a_eliminar[3]
-        producto=lista_cliente_a_eliminar[4]
-        falto_pagar=faltante_pagar(self.id_cliente_a_eliminar)
+        
+       
+       
         if (lista_vacia(lista_cliente_a_eliminar)== False ):    
             self.mi_id.set('')
-            
+            lista_cliente_a_eliminar=list(lista_cliente_a_eliminar[0])
+            nombre=lista_cliente_a_eliminar[0]
+            dni=lista_cliente_a_eliminar[1]
+            garante=lista_cliente_a_eliminar[2]
+            contacto=lista_cliente_a_eliminar[3]
+            producto=lista_cliente_a_eliminar[4]
+            falto_pagar=faltante_pagar(self.id_cliente_a_eliminar)
             self.ventan_nueva=tk.Toplevel()
             
             mensaje_nombre="el cliente de nombre "+nombre
@@ -575,7 +577,7 @@ class frame_eliminar_credito(tk.Frame):
 
 
             boton_eliminar=tk.Button(self.ventan_nueva,text="eliminar",command=self.borrar_credito)
-            boton_eliminar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+            boton_eliminar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='red',cursor='pirate',activebackground='#35BD6F')
             boton_eliminar.grid(row=7,column=0,padx=10,pady=10)
 
             boton_cancelar=tk.Button(self.ventan_nueva,text="cancelar",command=self.cancelar_borrado)
