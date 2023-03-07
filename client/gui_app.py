@@ -97,4 +97,3 @@ class App(tk.Frame):
             if self._frame is None:
                 self._frame = frame_informe_B(self)  
 
-    

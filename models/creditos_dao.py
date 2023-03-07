@@ -201,7 +201,7 @@ def busquedanombre(nombre):
          messagebox.showerror(titulo,mensaje)
 
 
-def eliminar_todas_cuotas(ide):
+def faltante_pagar(ide):
     conexion=ConexionDB()
 
     sql=f"""SELECT monto_base,al_dia FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
@@ -228,14 +228,20 @@ def eliminar_todas_cuotas(ide):
                  total=total+monto
                 else: 
                     total=total+monto*1.13
-           print ("el cliente debe un total de ")
-           print(total)
-           sql_2=f"""update fecha_vencimientos set estado=0 where idcliente='{ide}'
-    """
-           conexion.cursor.execute(sql_2)
+       
            conexion.cerrar()
-                    
+           return total     
     else: 
-        print("se la debo")
+        
+        return 0
 def lista_vacia(lista):
         return not lista
+
+
+def borrar_cliente(ide):
+    fin_credito(ide)
+    conexion=ConexionDB()
+    sql_1=f"""update fecha_vencimientos set estado=0 where idcliente='{ide}'
+    """
+    conexion.cursor.execute(sql_1)
+    conexion.cerrar()

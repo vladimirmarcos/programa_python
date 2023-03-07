@@ -3,7 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox,Menu
 import datetime
 from models.conexion_db import ConexionDB
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,eliminar_todas_cuotas,lista_vacia
+from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,faltante_pagar,lista_vacia,borrar_cliente
+
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -507,31 +508,79 @@ class frame_eliminar_credito(tk.Frame):
 
           #botones
 
-        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.borrar_cliente)
+        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.verificacion_borrar_cliente)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
         self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
      
      
      def buscar_id(self,ide):
         conexion=ConexionDB()
-        sql=f"""SELECT cuota FROM datos_clientes WHERE id_clientes='{ide}' AND estado=1"""
+        sql=f"""SELECT nombre,dni,garante,contacto,producto FROM datos_clientes WHERE id_clientes='{ide}' AND estado=1"""
         conexion.cursor.execute(sql)
         lista_cliente_a_eliminar=[]
         lista_cliente_a_eliminar=conexion.cursor.fetchall()
         conexion.cerrar()
         return (lista_cliente_a_eliminar)
      
-     def borrar_cliente(self):
-        id_cliente_a_eliminar=self.mi_id.get()
-        lista_cliente_a_eliminar=self.buscar_id(id_cliente_a_eliminar)
+     def verificacion_borrar_cliente(self):
+        self.id_cliente_a_eliminar=self.mi_id.get()
+        lista_cliente_a_eliminar=self.buscar_id(self.id_cliente_a_eliminar)
+        lista_cliente_a_eliminar=list(lista_cliente_a_eliminar[0])
         
-        if (lista_vacia(lista_cliente_a_eliminar)== False ):
-            
-            fin_credito(id_cliente_a_eliminar)
-            eliminar_todas_cuotas(id_cliente_a_eliminar)
-            
-                
+        
+        nombre=lista_cliente_a_eliminar[0]
+        dni=lista_cliente_a_eliminar[1]
+        garante=lista_cliente_a_eliminar[2]
+        contacto=lista_cliente_a_eliminar[3]
+        producto=lista_cliente_a_eliminar[4]
+        falto_pagar=faltante_pagar(self.id_cliente_a_eliminar)
+        if (lista_vacia(lista_cliente_a_eliminar)== False ):    
             self.mi_id.set('')
+            
+            self.ventan_nueva=tk.Toplevel()
+            
+            mensaje_nombre="el cliente de nombre "+nombre
+            mensaje_dni="con dni "+dni
+            mensaje_garante="con garante a "+garante
+            mensaje_contacto=" su  contacto es "+contacto
+            mensaje_producto=" que solicito un credito por el producto "+producto
+            mensaje_falto_pagar=" le falto pagar un total de "+str(falto_pagar)
+            label_1=tk.Label(self.ventan_nueva,text=mensaje_nombre)
+            label_1.config(font=('Arial',12,'bold'))
+            label_1.grid(row=0,column=0,padx=10,pady=10)
+
+            label_2=tk.Label(self.ventan_nueva,text=mensaje_dni)
+            label_2.config(font=('Arial',12,'bold'))
+            label_2.grid(row=1,column=0,padx=10,pady=10)
+
+            label_3=tk.Label(self.ventan_nueva,text=mensaje_garante)
+            label_3.config(font=('Arial',12,'bold'))
+            label_3.grid(row=2,column=0,padx=10,pady=10)
+
+            label_4=tk.Label(self.ventan_nueva,text=mensaje_contacto)
+            label_4.config(font=('Arial',12,'bold'))
+            label_4.grid(row=3,column=0,padx=10,pady=10)
+
+            label_5=tk.Label(self.ventan_nueva,text=mensaje_producto)
+            label_5.config(font=('Arial',12,'bold'))
+            label_5.grid(row=4,column=0,padx=10,pady=10)
+
+            label_6=tk.Label(self.ventan_nueva,text=mensaje_falto_pagar)
+            label_6.config(font=('Arial',12,'bold'))
+            label_6.grid(row=5,column=0,padx=10,pady=10)
+            
+            label_7=label_id_nombre=tk.Label(self.ventan_nueva,text="¿Esta seguro que quiere eliminarlo?")
+            label_7.config(font=('Arial',12,'bold'))
+            label_7.grid(row=6,column=0,padx=10,pady=10)
+
+
+            boton_eliminar=tk.Button(self.ventan_nueva,text="eliminar",command=self.borrar_credito)
+            boton_eliminar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+            boton_eliminar.grid(row=7,column=0,padx=10,pady=10)
+
+            boton_cancelar=tk.Button(self.ventan_nueva,text="cancelar",command=self.cancelar_borrado)
+            boton_cancelar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+            boton_cancelar.grid(row=7,column=1,padx=10,pady=10)
             
         else:
             titulo=" error al borrar el credito"
@@ -539,11 +588,11 @@ class frame_eliminar_credito(tk.Frame):
             messagebox.showerror(titulo,mensaje)
             self.mi_id.set('')
 
-class frame_valicion_eliminacion(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.pack(fill=tk.BOTH, expand=tk.YES)
-        self.campos_creditos_pagos()
-    def borrar(self):
-        self.pack_forget()
-        self.destroy()
+     def borrar_credito(self):
+         self.mi_id.set('')
+         borrar_cliente(self.id_cliente_a_eliminar)
+         self.ventan_nueva.destroy()
+
+     def  cancelar_borrado(self):
+         self.mi_id.set('')
+         self.ventan_nueva.destroy()
