@@ -152,21 +152,20 @@ def pagos_cuotas(Pagos,fecha_id):
 
 def busquedadni(dni):
     conexion=ConexionDB()
+    lista_cliente=[]
     try:
-        lista_vacia=[]
+        
         sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni like '%{dni}%' AND estado =1"""
         conexion.cursor.execute(sql)
-        lista_vacia=conexion.cursor.fetchall()
-        algo=lista_vacia[(0)]
-    
-        print(lista_vacia[(0)])
-    
-        #print(lista_vacia(0))
+        lista_cliente=conexion.cursor.fetchall()
         conexion.cerrar()
+        return lista_cliente
     except:
-        titulo=" error al buscar credito"
-        mensaje= "el dni ingresado no esta asociado a ningún credito" 
-        messagebox.showerror(titulo,mensaje)
+           titulo=" error al buscar credito"
+           mensaje= "el dni ingresado no esta asociado a ningún credito" 
+           messagebox.showerror(titulo,mensaje)
+
+           return lista_cliente
 
     
 def fin_credito(id_cliente):
@@ -180,25 +179,24 @@ def fin_credito(id_cliente):
 
 
 def busquedanombre(nombre):
+    lista_cliente=[]
     try:
         conexion=ConexionDB()
-        lista_vacia=[]
+        
         variable="%"
         sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre like '%{nombre}%' AND estado =1
     """
         conexion.cursor.execute(sql)
-        lista_vacia=conexion.cursor.fetchall()
-        algo=lista_vacia[(0)]
-        print(algo)
-    
-       
+        lista_cliente=conexion.cursor.fetchall()
         conexion.cerrar()
+        return lista_cliente
        
 
     except:
          titulo=" error al buscar credito"
          mensaje= "el nombre ingresado no esta asociado a ningún credito" 
          messagebox.showerror(titulo,mensaje)
+         return lista_cliente
 
 
 def faltante_pagar(ide):

@@ -248,11 +248,30 @@ class frame_busqueda_dni(tk.Frame):
     
 
     def busqueda_dni(self):
-        lista_clientes=[]
-        dni=self.mi_dni.get()
-        busquedadni(dni)
-        self.mi_dni.set('')
-        
+      
+         lista_clientes=[]
+         dni=self.mi_dni.get()
+
+         lista_cliente=busquedadni(dni)
+         if (lista_vacia(lista_cliente)== False ):
+            self.mensaje_2=""
+            self.mi_dni.set('')
+            self.mensaje="los id de clientes asociados a ese dni son: \n"
+            for i in range (len(lista_cliente)):
+                cliente=lista_cliente[i]
+                cliente=list(cliente)
+                id_cliente=cliente[0]
+                nombre=cliente[1]
+                insumo=cliente[2]
+                self.mensaje_2=self.mensaje_2+"Nombre "+nombre+" su id es: "+ str(id_cliente)+ " tiene credito por el insumo "+ insumo +"\n"
+
+            titulo=" creditos asociados al dni"
+            mensaje= self.mensaje+self.mensaje_2
+            messagebox.showinfo(titulo,mensaje)
+              
+         else:
+             self.mi_dni.set('')
+
         
 class frame_busqueda_nombre(tk.Frame):
     def __init__(self, parent):
@@ -285,10 +304,27 @@ class frame_busqueda_nombre(tk.Frame):
         nombre=nombre.lower()
         
         nombre=nombre.strip()
-        busquedanombre(nombre)
+        
         self.mi_nombre.set('')
+        lista_cliente=busquedanombre(nombre)
+        if (lista_vacia(lista_cliente)== False ):
+            self.mensaje_2=""
+            self.mi_nombre.set('')
+            self.mensaje="los id de clientes asociados a ese nombre son: \n"
+            for i in range (len(lista_cliente)):
+                cliente=lista_cliente[i]
+                cliente=list(cliente)
+                id_cliente=cliente[0]
+                nombre=cliente[1]
+                insumo=cliente[2]
+                self.mensaje_2=self.mensaje_2+"Nombre "+nombre+" su id es: "+ str(id_cliente)+ " tiene credito por el insumo "+ insumo +"\n"
 
-
+            titulo=" creditos asociados al nombre buscado"
+            mensaje= self.mensaje+self.mensaje_2
+            messagebox.showinfo(titulo,mensaje)
+              
+        else:
+             self.mi_nombre.set('')
     
         
         
