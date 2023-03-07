@@ -271,7 +271,10 @@ class frame_busqueda_dni(tk.Frame):
               
          else:
              self.mi_dni.set('')
-
+             titulo=" creditos asociados al dni"
+             mensaje= "no se encuentran asociados ningun credidto a al dni " + dni
+             messagebox.showinfo(titulo,mensaje)
+             mesaje=""
         
 class frame_busqueda_nombre(tk.Frame):
     def __init__(self, parent):
@@ -325,7 +328,10 @@ class frame_busqueda_nombre(tk.Frame):
               
         else:
              self.mi_nombre.set('')
-    
+             titulo=" creditos asociados al nombre buscado"
+             mensaje= " no se encuentran asociados ningún credito al nombre "+ nombre
+             messagebox.showinfo(titulo,mensaje)
+             mensaje=""
         
         
 
@@ -381,6 +387,8 @@ class frame_pagos(tk.Frame):
         
         
         if (lista_vacia(algo)== False ):
+            
+
             algo_1=algo[0]
             algo_2=list(algo_1)
             fecha=algo_2[0]
