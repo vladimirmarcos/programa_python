@@ -2,8 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
 import datetime
+import sqlite3
 from models.conexion_db import ConexionDB
-from models.creditos_dao import Datos_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,faltante_pagar,lista_vacia,borrar_cliente
+from models.creditos_dao import Datos_Personas,Cuentas_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,faltante_pagar,lista_vacia,borrar_cliente,guardar_datos_cuentas,Creditos,buscar_cuenta,guardar_datos_creditos
 
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
@@ -217,7 +218,303 @@ class frame_inicio(tk.Frame):
             return valor*1.28
         elif (cantidad==5):
             return valor*1.33
-          
+
+
+
+class frame_cuenta_nueva(tk.Frame):
+     def __init__(self, parent):
+        super().__init__(parent)
+        self.pack(fill=tk.BOTH, expand=tk.YES)
+        self.campos_creditos()
+        self.desahabilitar_campos()
+     def campos_creditos(self):
+        #label de campos
+        self.label_nombre=tk.Label(self,text='Nombre')
+        self.label_nombre.config(font=('Arial',12,'bold'))
+        self.label_nombre.grid(row=0,column=0,padx=10,pady=10)
+
+        self.label_dni=tk.Label(self,text='DNI')
+        self.label_dni.config(font=('Arial',12,'bold'))
+        self.label_dni.grid(row=1,column=0,padx=10,pady=10)
+
+        self.label_contacto=tk.Label(self,text='contacto telef.')
+        self.label_contacto.config(font=('Arial',12,'bold'))
+        self.label_contacto.grid(row=2,column=0,padx=10,pady=10)  
+
+        
+        self.label_producto=tk.Label(self,text='Direccion')
+        self.label_producto.config(font=('Arial',12,'bold'))
+        self.label_producto.grid(row=3,column=0,padx=10,pady=10)
+
+ #Entrys de cada Campo
+
+        self.mi_nombre=tk.StringVar()
+        self.entry_nombre=tk.Entry(self,textvariable=self.mi_nombre)
+        self.entry_nombre.config(width=50,font=('Arial',12))
+        self.entry_nombre.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+
+        self.mi_dni=tk.StringVar()
+        self.entry_dni=tk.Entry(self,textvariable=self.mi_dni)
+        self.entry_dni.config(width=50,font=('Arial',12))
+        self.entry_dni.grid(row=1,column=1,padx=10,pady=10,columnspan=2)
+
+        self.mi_contacto_telefono=tk.StringVar()
+        self.entry_contacto_telefono=tk.Entry(self,textvariable=self.mi_contacto_telefono)
+        self.entry_contacto_telefono.config(width=50,font=('Arial',12))
+        self.entry_contacto_telefono.grid(row=2,column=1,padx=10,pady=10,columnspan=2)
+
+
+        self.mi_contacto_direccion=tk.StringVar()
+        self.entry_contacto_direccion=tk.Entry(self,textvariable=self.mi_contacto_direccion)
+        self.entry_contacto_direccion.config(width=50,font=('Arial',12))
+        self.entry_contacto_direccion.grid(row=3,column=1,padx=10,pady=10,columnspan=2)
+        
+
+         #botones
+
+        self.boton_nuevo=tk.Button(self,text="Nuevo cuenta",command=self.habilitar_campos)
+        self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+        self.boton_nuevo.grid(row=4,column=0,padx=10,pady=10)
+
+        self.boton_generar=tk.Button(self,text="Generar",command=self.guardar_datos)
+        self.boton_generar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#BD152E',cursor='pirate',activebackground='#E15370')
+        self.boton_generar.grid(row=4,column=1,padx=10,pady=10)
+
+        
+        
+        
+        self._frame = None
+     
+     def habilitar_campos(self):
+        
+
+        self.entry_nombre.config(state='normal')
+        self.entry_dni.config(state='normal')
+        self.entry_contacto_telefono.config(state='normal')
+        self.entry_contacto_direccion.config(state='normal')
+        self.boton_generar.config(state='normal')
+     def guardar_datos (self):
+      try: 
+        nombre=self.mi_nombre.get()
+        nombre=nombre.lower()
+        nombre=nombre.strip() 
+        dni=self.mi_dni.get()
+        dni=int(dni)
+        contacto_telefono=self.mi_contacto_telefono.get()
+        contacto_telefono=contacto_telefono.lower()
+        contacto_telefono=contacto_telefono.strip()
+        contacto_direccion=self.mi_contacto_direccion.get()
+        contacto_direccion=contacto_direccion.lower()
+        contacto_direccion=contacto_direccion.strip()
+        
+        Cuenta_Persona_nueva=Cuentas_Personas(
+            nombre,
+            dni,
+            contacto_telefono,
+            contacto_direccion,
+            "Bueno"
+
+            
+        )    
+        
+        guardar_datos_cuentas(Cuenta_Persona_nueva)
+        self.desahabilitar_campos()
+      except(sqlite3.IntegrityError):
+         
+        titulo=" error al registrar cliente nuevo"
+        mensaje= "el cliente ya posee una cuenta" 
+        messagebox.showerror(titulo,mensaje)  
+      except:
+        titulo=" error al registrar cliente nuevo"
+        mensaje= "faltan datos o los datos ingresados no son correctos" 
+        messagebox.showerror(titulo,mensaje)  
+     def desahabilitar_campos(self):
+        self.mi_nombre.set('')
+        self.mi_dni.set('')
+        self.mi_contacto_telefono.set('')
+        self.mi_contacto_direccion.set('')
+       
+
+        self.entry_nombre.config(state='disabled')
+        self.entry_dni.config(state='disabled')
+        self.entry_contacto_telefono.config(state='disabled')
+        self.entry_contacto_direccion.config(state='disabled')
+        
+
+        self.boton_generar.config(state='disabled')
+     
+     
+     
+     
+     def borrar(self):
+        self.pack_forget()
+        self.destroy()
+
+class frame_nuevo_credito(tk.Frame):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.pack(fill=tk.BOTH, expand=tk.YES)
+        self.campos_creditos()
+        self.desahabilitar_campos()
+
+
+
+    def campos_creditos(self):
+        #label de campos
+        self.label_cuenta=tk.Label(self,text='Cuenta')
+        self.label_cuenta.config(font=('Arial',12,'bold'))
+        self.label_cuenta.grid(row=0,column=0,padx=10,pady=10)
+
+        self.label_cuotas=tk.Label(self,text='cantidad de cuotas')
+        self.label_cuotas.config(font=('Arial',12,'bold'))
+        self.label_cuotas.grid(row=1,column=0,padx=10,pady=10)
+
+        self.label_productos=tk.Label(self,text='productos')
+        self.label_productos.config(font=('Arial',12,'bold'))
+        self.label_productos.grid(row=2,column=0,padx=10,pady=10)  
+
+        
+        self.label_monto_base=tk.Label(self,text='monto de contado')
+        self.label_monto_base.config(font=('Arial',12,'bold'))
+        self.label_monto_base.grid(row=3,column=0,padx=10,pady=10)
+
+        self.label_telefono_garante=tk.Label(self,text='telefono de garante')
+        self.label_telefono_garante.config(font=('Arial',12,'bold'))
+        self.label_telefono_garante.grid(row=4,column=0,padx=10,pady=10)
+
+        self.label_direccion_garante=tk.Label(self,text='direccion del garante')
+        self.label_direccion_garante.config(font=('Arial',12,'bold'))
+        self.label_direccion_garante.grid(row=5,column=0,padx=10,pady=10)
+
+        #Entrys de cada Campo
+
+        self.mi_cuenta=tk.StringVar()
+        self.entry_cuenta=tk.Entry(self,textvariable=self.mi_cuenta)
+        self.entry_cuenta.config(width=50,font=('Arial',12))
+        self.entry_cuenta.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+
+        self.mi_cuotas=tk.StringVar()
+        self.entry_cuotas=tk.Entry(self,textvariable=self.mi_cuotas)
+        self.entry_cuotas.config(width=50,font=('Arial',12))
+        self.entry_cuotas.grid(row=1,column=1,padx=10,pady=10,columnspan=2)
+
+        self.mi_productos=tk.StringVar()
+        self.entry_productos=tk.Entry(self,textvariable=self.mi_productos)
+        self.entry_productos.config(width=50,font=('Arial',12))
+        self.entry_productos.grid(row=2,column=1,padx=10,pady=10,columnspan=2)
+
+
+        self.mi_monto_base=tk.StringVar()
+        self.entry_monto_base=tk.Entry(self,textvariable=self.mi_monto_base)
+        self.entry_monto_base.config(width=50,font=('Arial',12))
+        self.entry_monto_base.grid(row=3,column=1,padx=10,pady=10,columnspan=2)
+
+        self.mi_telefono_garante=tk.StringVar()
+        self.entry_telefono_garante=tk.Entry(self,textvariable=self.mi_telefono_garante)
+        self.entry_telefono_garante.config(width=50,font=('Arial',12))
+        self.entry_telefono_garante.grid(row=4,column=1,padx=10,pady=10,columnspan=2)
+
+        self.mi_direccion_garante=tk.StringVar()
+        self.entry_direccion_garante=tk.Entry(self,textvariable=self.mi_direccion_garante)
+        self.entry_direccion_garante.config(width=50,font=('Arial',12))
+        self.entry_direccion_garante.grid(row=5,column=1,padx=10,pady=10,columnspan=2)
+
+
+ #botones
+
+        self.boton_nuevo=tk.Button(self,text="Nuevo credito",command=self.habilitar_campos)
+        self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+        self.boton_nuevo.grid(row=6,column=0,padx=10,pady=10)
+
+        self.boton_generar=tk.Button(self,text="Generar",command=self.guardar_datos)
+        self.boton_generar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#BD152E',cursor='pirate',activebackground='#E15370')
+        self.boton_generar.grid(row=6,column=1,padx=10,pady=10)
+
+
+    def guardar_datos (self):
+     try:
+        cuenta=self.mi_cuenta.get()
+        cuenta=int(cuenta)
+        cuenta=buscar_cuenta(cuenta)
+        cuenta=int(cuenta)
+        cuotas=self.mi_cuotas.get()
+        cuotas=int(cuotas)
+        productos=self.mi_productos.get()
+        productos=productos.lower()
+        productos=productos.strip()
+        monto_base=self.mi_monto_base.get()
+        monto_base=float(monto_base)
+
+        telefono_garante=self.mi_telefono_garante.get()
+        telefono_garante=telefono_garante.lower()
+        telefono_garante=telefono_garante.strip()
+
+        direccion_garante=self.mi_direccion_garante.get()
+        direccion_garante=direccion_garante.lower()
+        direccion_garante=direccion_garante.strip()
+        
+        Nuevo_credito=Creditos(cuenta,
+                               cuotas,
+                               productos,
+                               monto_base,
+                               telefono_garante,
+                               direccion_garante,
+                               0,
+                               1)
+        
+        guardar_datos_creditos(Nuevo_credito)
+        self.desahabilitar_campos()
+     except(TypeError):
+        titulo=" error al registrar nuevo credito "
+        mensaje= "la cuenta no esta asociada a ningun cliente" 
+        messagebox.showerror(titulo,mensaje)  
+     except:  
+         titulo=" error al registrar nuevo credito"
+         mensaje= "faltan datos o los datos ingresados no son correctos" 
+         messagebox.showerror(titulo,mensaje)  
+        
+       
+         
+        
+       
+
+    def borrar(self):
+        self.pack_forget()
+        self.destroy()
+
+    def desahabilitar_campos(self):
+        self.mi_cuenta.set('')
+        self.mi_cuotas.set('')
+        self.mi_productos.set('')
+        self.mi_monto_base.set('')
+        self.mi_telefono_garante.set('')
+        self.mi_direccion_garante.set('')
+       
+
+        self.entry_cuenta.config(state='disabled')
+        self.entry_cuotas.config(state='disabled')
+        self.entry_productos.config(state='disabled')
+        self.entry_monto_base.config(state='disabled')
+        self.entry_telefono_garante.config(state='disabled')
+        self.entry_direccion_garante.config(state='disabled')
+        
+
+        self.boton_generar.config(state='disabled')
+
+    
+
+    def habilitar_campos(self):
+        self.entry_cuenta.config(state='normal')
+        self.entry_cuotas.config(state='normal')
+        self.entry_productos.config(state='normal')
+        self.entry_monto_base.config(state='normal')
+        self.entry_telefono_garante.config(state='normal')
+        self.entry_direccion_garante.config(state='normal')
+        
+
+        self.boton_generar.config(state='normal')
+
 class frame_busqueda_dni(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -275,7 +572,9 @@ class frame_busqueda_dni(tk.Frame):
              mensaje= "no se encuentran asociados ningun credidto a al dni " + dni
              messagebox.showinfo(titulo,mensaje)
              mesaje=""
-        
+
+
+
 class frame_busqueda_nombre(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)

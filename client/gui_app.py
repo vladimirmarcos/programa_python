@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
-from ventanas.creacion_frame import frame_inicio,frame_eliminar_credito,frame_busqueda_nombre,frame_busqueda_dni,frame_mensajes,frame_informe_A,frame_informe_B,frame_pagos
+from ventanas.creacion_frame import frame_inicio,frame_eliminar_credito,frame_busqueda_nombre,frame_busqueda_dni,frame_mensajes,frame_informe_A,frame_informe_B,frame_pagos,frame_cuenta_nueva,frame_nuevo_credito
 
 class App(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -12,6 +12,8 @@ class App(tk.Frame):
         self.menu.add_cascade(label="Crear",menu=self.menu_inicio)
         self.menu_inicio.add_command(label="Nuevo Credito",command=self.crear_frame_inicio)
         self.menu_inicio.add_command(label="eliminar Credito",command=self.crear_frame_eliminar)
+        self.menu_inicio.add_command(label="Crear cuenta Nueva",command=self.crear_frame_nueva_cuenta)
+        self.menu_inicio.add_command(label="Crear nuevo credito",command=self.crear_frame_nuevo_credito)
         
         
         self.menu_buscar = tk.Menu(self.menu, tearoff=0)
@@ -43,6 +45,21 @@ class App(tk.Frame):
             self._frame = None
         if self._frame is None:
             self._frame = frame_inicio(self)
+
+
+    def crear_frame_nueva_cuenta(self):
+        if self._frame is not None:
+            self._frame.borrar()
+            self._frame = None
+        if self._frame is None:
+            self._frame = frame_cuenta_nueva(self)
+
+    def crear_frame_nuevo_credito(self):
+        if self._frame is not None:
+            self._frame.borrar()
+            self._frame = None
+        if self._frame is None:
+            self._frame = frame_nuevo_credito(self)
 
     def crear_frame_eliminar(self):
         if self._frame is not None:
