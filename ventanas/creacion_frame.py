@@ -464,17 +464,46 @@ class frame_nuevo_credito(tk.Frame):
                                1)
         
         guardar_datos_creditos(Nuevo_credito)
+
+        fecha_actual=datetime.datetime.now()
+        
+        total=self.calcular_intereses(monto_base,cuotas)
+        monto_cuota=total/cuotas
+        conexion=ConexionDB()
+        sql=f"""SELECT max(credito) FROM creditos """
+        conexion.cursor.execute(sql)
+        id_credito=[]
+        id_credito=conexion.cursor.fetchall()
+        id_credito=id_credito[0]
+        id_credito=list(id_credito)
+        id_credito=id_credito[0]
+        dato_fechas=Fechas_Vencimiento(fecha_actual,monto_cuota,1,1,cuenta,id_credito)
+        guardar_datos_fechas(dato_fechas,cuotas)
         self.desahabilitar_campos()
      except(TypeError):
         titulo=" error al registrar nuevo credito "
-        mensaje= "la cuenta no esta asociada a ningun cliente" 
+        mensaje= "la cuenta no esta asociada a ningun cliente"
         messagebox.showerror(titulo,mensaje)  
      except:  
          titulo=" error al registrar nuevo credito"
          mensaje= "faltan datos o los datos ingresados no son correctos" 
          messagebox.showerror(titulo,mensaje)  
         
-       
+
+    def calcular_intereses(self,valor,cantidad):
+        if (cantidad==1):
+            print(valor*1.13)
+            return valor*1.13
+        elif (cantidad==2):
+            print(valor*1.18)
+            return valor*1.18
+        elif (cantidad==3):
+            print(valor*1.23)
+            return valor*1.23
+        elif (cantidad==4):
+            return valor*1.28
+        elif (cantidad==5):
+            return valor*1.33  
          
         
        

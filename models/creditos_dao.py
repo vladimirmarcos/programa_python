@@ -24,23 +24,24 @@ def crear_tabla():
 	"telefono_garante"	TEXT NOT NULL,
 	"direccion_garante"	TEXT NOT NULL,
 	"judiciales"	INTEGER NOT NULL,
-	"activo"	INTEGER NOT NULL
+	"estado"	INTEGER NOT NULL
 );
   """
 
    
     sql_2='''
-     CREATE TABLE "fecha_vencimientos" (
-	"fecha_id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+     CREATE TABLE "fechas_pagos" (
+	"fecha_id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	"fecha"	TEXT NOT NULL,
 	"monto_base"	REAL NOT NULL,
-    "estado" INTEGER NOT NULL,
-    "al_dia" INTEGER NOT NULL,
-    "idcliente" INTEGER NOT NULL)
-    ;
+	"estado"	INTEGER NOT NULL,
+	"al_dia"	INTEGER NOT NULL,
+	"cuenta"	INTEGER NOT NULL,
+	"credito"	INTEGER NOT NULL
+);
    '''
 
-    sql_2='''
+    sql_3='''
      CREATE TABLE "pagos" (
 	"pagos_id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 	"fecha_pago"	TEXT NOT NULL,
@@ -53,6 +54,7 @@ def crear_tabla():
     try:
         conexion.cursor.execute(sql)
         conexion.cursor.execute(sql_1)
+        conexion.cursor.execute(sql_2)
         conexion.cerrar()
         
     except:
@@ -110,17 +112,18 @@ class Creditos:
         return f'Creditos[{self.cuenta},{self.cuotas},{self.productos},{self.monto_base},{self.telefono_garante},{self.direccion_garante},{self.judiciales},{self.estado}]'
 
 class Fechas_Vencimiento:
-    def __init__(self,fecha,monto,estado,al_dia,idcliente):
+    def __init__(self,fecha,monto_base,estado,al_dia,cuenta,credito):
         self.id_fecha=None
         self.fecha=fecha
-        self.monto=monto
+        self.monto_base=monto_base
         self.estado=estado
         self.al_dia=al_dia
-        self.idcliente=idcliente
+        self.cuenta=cuenta
+        self.credito=credito
        
 
     def __str__(self):
-        return f'Creditos[{self.fecha},{self.monto},{self.estado},{self.al_dia},{self.idcliente}]'
+        return f'Creditos[{self.fecha},{self.monto_base},{self.estado},{self.al_dia},{self.cuenta},{self.credito}]'
 
 class Pagos:   
     def __init__(self,fecha_pago,monto_pagado,fecha_id,id_cliente):
@@ -194,17 +197,19 @@ def guardar_datos_creditos(Creditos):
 
 def guardar_datos_fechas(Fechas_Vencimiento,numero):
     conexion=ConexionDB()
-    dia_delta=datetime.timedelta(days=31)
+    dia_delta=datetime.timedelta(days=30)
     Fechas_Vencimiento.fecha= Fechas_Vencimiento.fecha+dia_delta
-    sql=f"""INSERT INTO fecha_vencimientos (fecha,monto_base,estado,al_dia,idcliente)
-        VALUES ('{Fechas_Vencimiento.fecha}','{Fechas_Vencimiento.monto}','{Fechas_Vencimiento.estado}','{Fechas_Vencimiento.al_dia}','{Fechas_Vencimiento.idcliente}')
+    fecha_vencimiento=datetime.datetime.strftime(Fechas_Vencimiento.fecha,"%Y/%m/%d")
+    sql=f"""INSERT INTO fechas_pagos (fecha,monto_base,estado,al_dia,cuenta,credito)
+        VALUES ('{fecha_vencimiento}','{Fechas_Vencimiento.monto_base}','{Fechas_Vencimiento.estado}','{Fechas_Vencimiento.al_dia}','{Fechas_Vencimiento.cuenta}','{Fechas_Vencimiento.credito}')
     
         """
     conexion.cursor.execute(sql)
     for fecha in range (numero-1): 
         Fechas_Vencimiento.fecha= Fechas_Vencimiento.fecha+dia_delta
-        sql=f"""INSERT INTO fecha_vencimientos (fecha,monto_base,estado,al_dia,idcliente)
-        VALUES ('{Fechas_Vencimiento.fecha}','{Fechas_Vencimiento.monto}','{Fechas_Vencimiento.estado}','{Fechas_Vencimiento.al_dia}','{Fechas_Vencimiento.idcliente}')
+        fecha_vencimiento=datetime.datetime.strftime(Fechas_Vencimiento.fecha,"%Y/%m/%d")
+        sql=f"""INSERT INTO fechas_pagos (fecha,monto_base,estado,al_dia,cuenta,credito)
+        VALUES ('{fecha_vencimiento}','{Fechas_Vencimiento.monto_base}','{Fechas_Vencimiento.estado}','{Fechas_Vencimiento.al_dia}','{Fechas_Vencimiento.cuenta}','{Fechas_Vencimiento.credito}')
     
         """
         conexion.cursor.execute(sql)
