@@ -4,7 +4,7 @@ from tkinter import messagebox,Menu
 import datetime
 import sqlite3
 from models.conexion_db import ConexionDB
-from models.creditos_dao import Datos_Personas,Cuentas_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedanombre,pagos_cuotas,fin_credito,faltante_pagar,lista_vacia,borrar_cliente,guardar_datos_cuentas,Creditos,buscar_cuenta,guardar_datos_creditos
+from models.creditos_dao import Datos_Personas,Cuentas_Personas,guardar_datos_personas,Pagos,guardar_datos_fechas,Fechas_Vencimiento,crear_tabla,busquedadni,busquedacuenta,pagos_cuotas,faltante_pagar,lista_vacia,borrar_credito,guardar_datos_cuentas,Creditos,buscar_cuenta,guardar_datos_creditos,buscar_datos,buscar_id,enviar_credito_a_judiciales
 
 class frame_inicio(tk.Frame):
     def __init__(self, parent):
@@ -219,8 +219,6 @@ class frame_inicio(tk.Frame):
         elif (cantidad==5):
             return valor*1.33
 
-
-
 class frame_cuenta_nueva(tk.Frame):
      def __init__(self, parent):
         super().__init__(parent)
@@ -379,13 +377,17 @@ class frame_nuevo_credito(tk.Frame):
         self.label_monto_base.config(font=('Arial',12,'bold'))
         self.label_monto_base.grid(row=3,column=0,padx=10,pady=10)
 
+        self.label_nombre_garante=tk.Label(self,text='nombre del garante')
+        self.label_nombre_garante.config(font=('Arial',12,'bold'))
+        self.label_nombre_garante.grid(row=4,column=0,padx=10,pady=10)
+
         self.label_telefono_garante=tk.Label(self,text='telefono de garante')
         self.label_telefono_garante.config(font=('Arial',12,'bold'))
-        self.label_telefono_garante.grid(row=4,column=0,padx=10,pady=10)
+        self.label_telefono_garante.grid(row=5,column=0,padx=10,pady=10)
 
         self.label_direccion_garante=tk.Label(self,text='direccion del garante')
         self.label_direccion_garante.config(font=('Arial',12,'bold'))
-        self.label_direccion_garante.grid(row=5,column=0,padx=10,pady=10)
+        self.label_direccion_garante.grid(row=6,column=0,padx=10,pady=10)
 
         #Entrys de cada Campo
 
@@ -410,26 +412,31 @@ class frame_nuevo_credito(tk.Frame):
         self.entry_monto_base.config(width=50,font=('Arial',12))
         self.entry_monto_base.grid(row=3,column=1,padx=10,pady=10,columnspan=2)
 
+        self.mi_nombre_garante=tk.StringVar()
+        self.entry_nombre_garante=tk.Entry(self,textvariable=self.mi_nombre_garante)
+        self.entry_nombre_garante.config(width=50,font=('Arial',12))
+        self.entry_nombre_garante.grid(row=4,column=1,padx=10,pady=10,columnspan=2)
+
         self.mi_telefono_garante=tk.StringVar()
         self.entry_telefono_garante=tk.Entry(self,textvariable=self.mi_telefono_garante)
         self.entry_telefono_garante.config(width=50,font=('Arial',12))
-        self.entry_telefono_garante.grid(row=4,column=1,padx=10,pady=10,columnspan=2)
+        self.entry_telefono_garante.grid(row=5,column=1,padx=10,pady=10,columnspan=2)
 
         self.mi_direccion_garante=tk.StringVar()
         self.entry_direccion_garante=tk.Entry(self,textvariable=self.mi_direccion_garante)
         self.entry_direccion_garante.config(width=50,font=('Arial',12))
-        self.entry_direccion_garante.grid(row=5,column=1,padx=10,pady=10,columnspan=2)
+        self.entry_direccion_garante.grid(row=6,column=1,padx=10,pady=10,columnspan=2)
 
 
  #botones
 
         self.boton_nuevo=tk.Button(self,text="Nuevo credito",command=self.habilitar_campos)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
-        self.boton_nuevo.grid(row=6,column=0,padx=10,pady=10)
+        self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
 
         self.boton_generar=tk.Button(self,text="Generar",command=self.guardar_datos)
         self.boton_generar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#BD152E',cursor='pirate',activebackground='#E15370')
-        self.boton_generar.grid(row=6,column=1,padx=10,pady=10)
+        self.boton_generar.grid(row=7,column=1,padx=10,pady=10)
 
 
     def guardar_datos (self):
@@ -443,6 +450,9 @@ class frame_nuevo_credito(tk.Frame):
         productos=self.mi_productos.get()
         productos=productos.lower()
         productos=productos.strip()
+        nombre_garante=self.mi_nombre_garante.get()
+        nombre_garante=nombre_garante.lower()
+        nombre_garante=nombre_garante.strip()
         monto_base=self.mi_monto_base.get()
         monto_base=float(monto_base)
 
@@ -458,6 +468,7 @@ class frame_nuevo_credito(tk.Frame):
                                cuotas,
                                productos,
                                monto_base,
+                               nombre_garante,
                                telefono_garante,
                                direccion_garante,
                                0,
@@ -492,13 +503,13 @@ class frame_nuevo_credito(tk.Frame):
 
     def calcular_intereses(self,valor,cantidad):
         if (cantidad==1):
-            print(valor*1.13)
+            
             return valor*1.13
         elif (cantidad==2):
-            print(valor*1.18)
+            
             return valor*1.18
         elif (cantidad==3):
-            print(valor*1.23)
+           
             return valor*1.23
         elif (cantidad==4):
             return valor*1.28
@@ -517,6 +528,7 @@ class frame_nuevo_credito(tk.Frame):
         self.mi_cuotas.set('')
         self.mi_productos.set('')
         self.mi_monto_base.set('')
+        self.mi_nombre_garante.set('')
         self.mi_telefono_garante.set('')
         self.mi_direccion_garante.set('')
        
@@ -525,6 +537,7 @@ class frame_nuevo_credito(tk.Frame):
         self.entry_cuotas.config(state='disabled')
         self.entry_productos.config(state='disabled')
         self.entry_monto_base.config(state='disabled')
+        self.entry_nombre_garante.config(state='disabled')
         self.entry_telefono_garante.config(state='disabled')
         self.entry_direccion_garante.config(state='disabled')
         
@@ -538,6 +551,7 @@ class frame_nuevo_credito(tk.Frame):
         self.entry_cuotas.config(state='normal')
         self.entry_productos.config(state='normal')
         self.entry_monto_base.config(state='normal')
+        self.entry_nombre_garante.config(state='normal')
         self.entry_telefono_garante.config(state='normal')
         self.entry_direccion_garante.config(state='normal')
         
@@ -582,29 +596,27 @@ class frame_busqueda_dni(tk.Frame):
          if (lista_vacia(lista_cliente)== False ):
             self.mensaje_2=""
             self.mi_dni.set('')
-            self.mensaje="los id de clientes asociados a ese dni son: \n"
-            for i in range (len(lista_cliente)):
-                cliente=lista_cliente[i]
-                cliente=list(cliente)
-                id_cliente=cliente[0]
-                nombre=cliente[1]
-                insumo=cliente[2]
-                self.mensaje_2=self.mensaje_2+"Nombre "+nombre+" su id es: "+ str(id_cliente)+ " tiene credito por el insumo "+ insumo +"\n"
+            self.mensaje="con el dni "+ dni+ " encontramos asociado al siguiente cliente \n"
+            
+            cliente=list(lista_cliente[0])
+            numero_cuenta=cliente[0]
+            nombre=cliente[1]
+            telefono=cliente[2]
+            direccion=cliente[3]
+            self.mensaje_2=self.mensaje_2+"Nombre "+nombre+"\nsu número de cuenta es "+ str(numero_cuenta)+ "\nsu número de contacto es "+ telefono +"\nvive en "+direccion
 
-            titulo=" creditos asociados al dni"
+            titulo=" cuenta asociada al dni "+ dni
             mensaje= self.mensaje+self.mensaje_2
             messagebox.showinfo(titulo,mensaje)
               
          else:
              self.mi_dni.set('')
-             titulo=" creditos asociados al dni"
-             mensaje= "no se encuentran asociados ningun credidto a al dni " + dni
+             titulo=" cuenta asociada al dni "+dni
+             mensaje= "no se encuentran asociada ninguna cuenta al dni " + dni
              messagebox.showinfo(titulo,mensaje)
              mesaje=""
 
-
-
-class frame_busqueda_nombre(tk.Frame):
+class frame_busqueda_cuenta(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.pack(fill=tk.BOTH, expand=tk.YES)
@@ -612,52 +624,47 @@ class frame_busqueda_nombre(tk.Frame):
         self.campos_creditos_nombre()
 
     def campos_creditos_nombre(self):
-        self.label_nombre=tk.Label(self,text='Nombre')
-        self.label_nombre.config(font=('Arial',12,'bold'))
-        self.label_nombre.grid(row=0,column=0,padx=10,pady=10)
+        self.label_cuenta=tk.Label(self,text='N de Cuenta')
+        self.label_cuenta.config(font=('Arial',12,'bold'))
+        self.label_cuenta.grid(row=0,column=0,padx=10,pady=10)
 
-        self.mi_nombre=tk.StringVar()
-        self.entry_nombre=tk.Entry(self,textvariable=self.mi_nombre)
-        self.entry_nombre.config(width=50,font=('Arial',12))
-        self.entry_nombre.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+        self.mi_cuenta=tk.StringVar()
+        self.entry_cuenta=tk.Entry(self,textvariable=self.mi_cuenta)
+        self.entry_cuenta.config(width=50,font=('Arial',12))
+        self.entry_cuenta.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
 
          #botones
 
-        self.boton_nuevo=tk.Button(self,text="Buscar ",command=self.busqueda_nombre)
+        self.boton_nuevo=tk.Button(self,text="Buscar ",command=self.busqueda_cuenta)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
-        self.boton_nuevo.grid(row=4,column=0,padx=10,pady=10)
+        self.boton_nuevo.grid(row=1,column=0,padx=10,pady=10)
 
-    def busqueda_nombre(self):
+    def busqueda_cuenta(self):
         lista_clientes=[]
-        nombre=self.mi_nombre.get()
+        cuenta=self.mi_cuenta.get()
         
-        
-        nombre=nombre.lower()
-        
-        nombre=nombre.strip()
-        
-        self.mi_nombre.set('')
-        lista_cliente=busquedanombre(nombre)
+        self.mi_cuenta.set('')
+        lista_cliente=busquedacuenta(cuenta)
         if (lista_vacia(lista_cliente)== False ):
             self.mensaje_2=""
-            self.mi_nombre.set('')
-            self.mensaje="los id de clientes asociados a ese nombre son: \n"
-            for i in range (len(lista_cliente)):
-                cliente=lista_cliente[i]
-                cliente=list(cliente)
-                id_cliente=cliente[0]
-                nombre=cliente[1]
-                insumo=cliente[2]
-                self.mensaje_2=self.mensaje_2+"Nombre "+nombre+" su id es: "+ str(id_cliente)+ " tiene credito por el insumo "+ insumo +"\n"
+            self.mi_cuenta.set('')
+            self.mensaje="El cliente asociado a ese número de cuenta es "
+            
+            cliente=list(lista_cliente[0])
+            nombre=cliente[0]
+            dni=cliente[1]
+            telefono=cliente[2]
+            direccion=cliente[3]
+            self.mensaje_2=self.mensaje_2+"Nombre "+nombre+" su dni es "+ str(dni)+ " su numero de contacto es "+ telefono + " su direccion es "+ direccion+ "\n"
 
             titulo=" creditos asociados al nombre buscado"
             mensaje= self.mensaje+self.mensaje_2
             messagebox.showinfo(titulo,mensaje)
               
         else:
-             self.mi_nombre.set('')
-             titulo=" creditos asociados al nombre buscado"
-             mensaje= " no se encuentran asociados ningún credito al nombre "+ nombre
+             self.mi_cuenta.set('')
+             titulo=" cuenta no encontrada"
+             mensaje= " no se encuentran ningun cliente asociado a ese número de cuenta "
              messagebox.showinfo(titulo,mensaje)
              mensaje=""
         
@@ -737,7 +744,7 @@ class frame_pagos(tk.Frame):
                 pagos_cuotas(pagare,fechaid)
             if (len(algo)-1==0):
                 ide=int(ide)
-                fin_credito(ide)
+               # fin_credito(ide) aca pones para sacar el credito de circulacion
                    
                 
             self.mi_id.set('')
@@ -849,7 +856,134 @@ class frame_informe_B(tk.Frame):
     def borrar(self):
         self.pack_forget()
         self.destroy()     
+class fram_enviar_a_judiciales(tk.Frame):
+     def __init__(self, parent):
+        super().__init__(parent)
+        self.pack(fill=tk.BOTH, expand=tk.YES)
+        self.campos_creditos_pagos()
+     def borrar(self):
+        self.pack_forget()
+        self.destroy()
+     def campos_creditos_pagos(self):
+        
 
+        #label de campos
+        self.label_credito=tk.Label(self,text='numero del credito')
+        self.label_credito.config(font=('Arial',12,'bold'))
+        self.label_credito.grid(row=0,column=0,padx=10,pady=10)
+
+
+
+         #Entrys de cada Campo
+
+        self.mi_credito=tk.StringVar()
+        self.entry_credito=tk.Entry(self,textvariable=self.mi_credito)
+        self.entry_credito.config(width=50,font=('Arial',12))
+        self.entry_credito.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+       
+
+
+          #botones
+
+        self.boton_nuevo=tk.Button(self,text="Enviar",command=self.verificacion_de_Credito)
+        self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+        self.boton_nuevo.grid(row=1,column=0,padx=10,pady=10)
+
+     def verificacion_de_Credito(self):
+        self.id_credito_a_eliminar=self.mi_credito.get()
+        lista_credito_a_eliminar=buscar_id(self.id_credito_a_eliminar)
+        
+         
+        
+        if (lista_vacia(lista_credito_a_eliminar)== False ):    
+            self.mi_credito.set('')
+            lista_credito_a_eliminar=list(lista_credito_a_eliminar[0])
+            cuenta=lista_credito_a_eliminar[0] 
+            producto=lista_credito_a_eliminar[1]
+            telefono_garante=lista_credito_a_eliminar[2]
+            direccion_garante=lista_credito_a_eliminar[3]
+            nombre_garante=lista_credito_a_eliminar[4]
+            datos_clientes=buscar_datos(cuenta)
+            nombre=datos_clientes[0]
+            dni=datos_clientes[1]
+            numero_telefonico=datos_clientes[2]
+            vive=datos_clientes[3]
+            falto_pagar=faltante_pagar(self.id_credito_a_eliminar)
+            self.ventan_nueva=tk.Toplevel()
+            mensaje_nombre="el cliente de nombre "+nombre
+            mensaje_dni="con dni "+str(dni)
+            mensaje_contacto_telefono=" su  telefono de contacto es "+numero_telefonico
+            mensaje_contacto_direccion=" con direccion en "+vive
+            mensaje_nombre_garante="con garante a "+nombre_garante
+            mensaje_telefono_garante=" su  telefono de contacto es "+telefono_garante
+            mensaje_contacto_direccion_garante=" con direccion en "+direccion_garante
+            mensaje_producto=" que solicito un credito por el producto "+producto
+            mensaje_falto_pagar=" le falto pagar un total de "+str(falto_pagar)
+
+
+            label_1=tk.Label(self.ventan_nueva,text=mensaje_nombre)
+            label_1.config(font=('Arial',12,'bold'))
+            label_1.grid(row=0,column=0,padx=10,pady=10)
+
+            label_2=tk.Label(self.ventan_nueva,text=mensaje_dni)
+            label_2.config(font=('Arial',12,'bold'))
+            label_2.grid(row=1,column=0,padx=10,pady=10)
+
+            label_3=tk.Label(self.ventan_nueva,text=mensaje_contacto_telefono)
+            label_3.config(font=('Arial',12,'bold'))
+            label_3.grid(row=2,column=0,padx=10,pady=10)
+
+            label_4=tk.Label(self.ventan_nueva,text=mensaje_contacto_direccion)
+            label_4.config(font=('Arial',12,'bold'))
+            label_4.grid(row=3,column=0,padx=10,pady=10)
+
+            label_5=tk.Label(self.ventan_nueva,text=mensaje_nombre_garante)
+            label_5.config(font=('Arial',12,'bold'))
+            label_5.grid(row=4,column=0,padx=10,pady=10)
+
+            label_6=tk.Label(self.ventan_nueva,text=mensaje_telefono_garante)
+            label_6.config(font=('Arial',12,'bold'))
+            label_6.grid(row=5,column=0,padx=10,pady=10)
+
+            label_7=tk.Label(self.ventan_nueva,text=mensaje_contacto_direccion_garante)
+            label_7.config(font=('Arial',12,'bold'))
+            label_7.grid(row=6,column=0,padx=10,pady=10)
+
+            label_8=tk.Label(self.ventan_nueva,text=mensaje_producto)
+            label_8.config(font=('Arial',12,'bold'))
+            label_8.grid(row=7,column=0,padx=10,pady=10)
+
+            label_9=tk.Label(self.ventan_nueva,text=mensaje_falto_pagar)
+            label_9.config(font=('Arial',12,'bold'))
+            label_9.grid(row=8,column=0,padx=10,pady=10)
+            
+            label_10=label_id_nombre=tk.Label(self.ventan_nueva,text="¿Esta seguro que quiere eliminarlo?")
+            label_10.config(font=('Arial',12,'bold'))
+            label_10.grid(row=9,column=0,padx=10,pady=10)
+
+
+            boton_eliminar=tk.Button(self.ventan_nueva,text="enviar a judiciales",command=self.enviar_a_judiciales)
+            boton_eliminar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='red',cursor='pirate',activebackground='#35BD6F')
+            boton_eliminar.grid(row=10,column=0,padx=10,pady=10)
+
+            boton_cancelar=tk.Button(self.ventan_nueva,text="cancelar",command=self.cancelar_enviado)
+            boton_cancelar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
+            boton_cancelar.grid(row=10,column=1,padx=10,pady=10)
+ 
+        else:
+            titulo=" error al borrar el credito"
+            mensaje= "No se registro ningun credito con ese numero " 
+            messagebox.showerror(titulo,mensaje)
+            self.mi_credito.set('')
+
+     def enviar_a_judiciales(self):
+         self.mi_credito.set('')
+         enviar_credito_a_judiciales(self.id_credito_a_eliminar)
+         self.ventan_nueva.destroy()
+
+     def  cancelar_enviado(self):
+         self.mi_credito.set('')
+         self.ventan_nueva.destroy()
 
 class frame_eliminar_credito(tk.Frame):
      def __init__(self, parent):
@@ -863,18 +997,18 @@ class frame_eliminar_credito(tk.Frame):
         
 
         #label de campos
-        self.label_id=tk.Label(self,text='id del cliente')
-        self.label_id.config(font=('Arial',12,'bold'))
-        self.label_id.grid(row=0,column=0,padx=10,pady=10)
+        self.label_credito=tk.Label(self,text='numero del credito')
+        self.label_credito.config(font=('Arial',12,'bold'))
+        self.label_credito.grid(row=0,column=0,padx=10,pady=10)
 
 
 
          #Entrys de cada Campo
 
-        self.mi_id=tk.StringVar()
-        self.entry_id=tk.Entry(self,textvariable=self.mi_id)
-        self.entry_id.config(width=50,font=('Arial',12))
-        self.entry_id.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
+        self.mi_credito=tk.StringVar()
+        self.entry_credito=tk.Entry(self,textvariable=self.mi_credito)
+        self.entry_credito.config(width=50,font=('Arial',12))
+        self.entry_credito.grid(row=0,column=1,padx=10,pady=10,columnspan=2)
        
 
 
@@ -882,43 +1016,43 @@ class frame_eliminar_credito(tk.Frame):
 
         self.boton_nuevo=tk.Button(self,text="Enviar",command=self.verificacion_borrar_cliente)
         self.boton_nuevo.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
-        self.boton_nuevo.grid(row=7,column=0,padx=10,pady=10)
+        self.boton_nuevo.grid(row=1,column=0,padx=10,pady=10)
      
      
-     def buscar_id(self,ide):
-        conexion=ConexionDB()
-        sql=f"""SELECT nombre,dni,garante,contacto,producto FROM datos_clientes WHERE id_clientes='{ide}' AND estado=1"""
-        conexion.cursor.execute(sql)
-        lista_cliente_a_eliminar=[]
-        lista_cliente_a_eliminar=conexion.cursor.fetchall()
-        conexion.cerrar()
-        return (lista_cliente_a_eliminar)
+     
      
      def verificacion_borrar_cliente(self):
-        self.id_cliente_a_eliminar=self.mi_id.get()
-        lista_cliente_a_eliminar=self.buscar_id(self.id_cliente_a_eliminar)
+        self.id_credito_a_eliminar=self.mi_credito.get()
+        lista_credito_a_eliminar=buscar_id(self.id_credito_a_eliminar)
         
+         
         
-        
-       
-       
-        if (lista_vacia(lista_cliente_a_eliminar)== False ):    
-            self.mi_id.set('')
-            lista_cliente_a_eliminar=list(lista_cliente_a_eliminar[0])
-            nombre=lista_cliente_a_eliminar[0]
-            dni=lista_cliente_a_eliminar[1]
-            garante=lista_cliente_a_eliminar[2]
-            contacto=lista_cliente_a_eliminar[3]
-            producto=lista_cliente_a_eliminar[4]
-            falto_pagar=faltante_pagar(self.id_cliente_a_eliminar)
+        if (lista_vacia(lista_credito_a_eliminar)== False ):    
+            self.mi_credito.set('')
+            lista_credito_a_eliminar=list(lista_credito_a_eliminar[0])
+            cuenta=lista_credito_a_eliminar[0] 
+            producto=lista_credito_a_eliminar[1]
+            telefono_garante=lista_credito_a_eliminar[2]
+            direccion_garante=lista_credito_a_eliminar[3]
+            nombre_garante=lista_credito_a_eliminar[4]
+            datos_clientes=buscar_datos(cuenta)
+            nombre=datos_clientes[0]
+            dni=datos_clientes[1]
+            numero_telefonico=datos_clientes[2]
+            vive=datos_clientes[3]
+            falto_pagar=faltante_pagar(self.id_credito_a_eliminar)
             self.ventan_nueva=tk.Toplevel()
-            
             mensaje_nombre="el cliente de nombre "+nombre
-            mensaje_dni="con dni "+dni
-            mensaje_garante="con garante a "+garante
-            mensaje_contacto=" su  contacto es "+contacto
+            mensaje_dni="con dni "+str(dni)
+            mensaje_contacto_telefono=" su  telefono de contacto es "+numero_telefonico
+            mensaje_contacto_direccion=" con direccion en "+vive
+            mensaje_nombre_garante="con garante a "+nombre_garante
+            mensaje_telefono_garante=" su  telefono de contacto es "+telefono_garante
+            mensaje_contacto_direccion_garante=" con direccion en "+direccion_garante
             mensaje_producto=" que solicito un credito por el producto "+producto
             mensaje_falto_pagar=" le falto pagar un total de "+str(falto_pagar)
+
+
             label_1=tk.Label(self.ventan_nueva,text=mensaje_nombre)
             label_1.config(font=('Arial',12,'bold'))
             label_1.grid(row=0,column=0,padx=10,pady=10)
@@ -927,46 +1061,58 @@ class frame_eliminar_credito(tk.Frame):
             label_2.config(font=('Arial',12,'bold'))
             label_2.grid(row=1,column=0,padx=10,pady=10)
 
-            label_3=tk.Label(self.ventan_nueva,text=mensaje_garante)
+            label_3=tk.Label(self.ventan_nueva,text=mensaje_contacto_telefono)
             label_3.config(font=('Arial',12,'bold'))
             label_3.grid(row=2,column=0,padx=10,pady=10)
 
-            label_4=tk.Label(self.ventan_nueva,text=mensaje_contacto)
+            label_4=tk.Label(self.ventan_nueva,text=mensaje_contacto_direccion)
             label_4.config(font=('Arial',12,'bold'))
             label_4.grid(row=3,column=0,padx=10,pady=10)
 
-            label_5=tk.Label(self.ventan_nueva,text=mensaje_producto)
+            label_5=tk.Label(self.ventan_nueva,text=mensaje_nombre_garante)
             label_5.config(font=('Arial',12,'bold'))
             label_5.grid(row=4,column=0,padx=10,pady=10)
 
-            label_6=tk.Label(self.ventan_nueva,text=mensaje_falto_pagar)
+            label_6=tk.Label(self.ventan_nueva,text=mensaje_telefono_garante)
             label_6.config(font=('Arial',12,'bold'))
             label_6.grid(row=5,column=0,padx=10,pady=10)
-            
-            label_7=label_id_nombre=tk.Label(self.ventan_nueva,text="¿Esta seguro que quiere eliminarlo?")
+
+            label_7=tk.Label(self.ventan_nueva,text=mensaje_contacto_direccion_garante)
             label_7.config(font=('Arial',12,'bold'))
             label_7.grid(row=6,column=0,padx=10,pady=10)
+
+            label_8=tk.Label(self.ventan_nueva,text=mensaje_producto)
+            label_8.config(font=('Arial',12,'bold'))
+            label_8.grid(row=7,column=0,padx=10,pady=10)
+
+            label_9=tk.Label(self.ventan_nueva,text=mensaje_falto_pagar)
+            label_9.config(font=('Arial',12,'bold'))
+            label_9.grid(row=8,column=0,padx=10,pady=10)
+            
+            label_10=label_id_nombre=tk.Label(self.ventan_nueva,text="¿Esta seguro que quiere eliminarlo?")
+            label_10.config(font=('Arial',12,'bold'))
+            label_10.grid(row=9,column=0,padx=10,pady=10)
 
 
             boton_eliminar=tk.Button(self.ventan_nueva,text="eliminar",command=self.borrar_credito)
             boton_eliminar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='red',cursor='pirate',activebackground='#35BD6F')
-            boton_eliminar.grid(row=7,column=0,padx=10,pady=10)
+            boton_eliminar.grid(row=10,column=0,padx=10,pady=10)
 
             boton_cancelar=tk.Button(self.ventan_nueva,text="cancelar",command=self.cancelar_borrado)
             boton_cancelar.config(width=20,font=('Arial',12,'bold'),fg='#DAD5D6',bg='#158645',cursor='pirate',activebackground='#35BD6F')
-            boton_cancelar.grid(row=7,column=1,padx=10,pady=10)
-            
+            boton_cancelar.grid(row=10,column=1,padx=10,pady=10)
+ 
         else:
             titulo=" error al borrar el credito"
-            mensaje= "No se registro ningun cliente con ese id " 
+            mensaje= "No se registro ningun credito con ese numero " 
             messagebox.showerror(titulo,mensaje)
-            self.mi_id.set('')
+            self.mi_credito.set('')
 
      def borrar_credito(self):
-         self.mi_id.set('')
-         borrar_cliente(self.id_cliente_a_eliminar)
+         self.mi_credito.set('')
+         borrar_credito(self.id_credito_a_eliminar)
          self.ventan_nueva.destroy()
 
      def  cancelar_borrado(self):
-         self.mi_id.set('')
+         self.mi_credito.set('')
          self.ventan_nueva.destroy()

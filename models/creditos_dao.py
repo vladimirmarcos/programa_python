@@ -21,6 +21,7 @@ def crear_tabla():
 	"cuotas"	INTEGER NOT NULL,
 	"productos"	TEXT NOT NULL,
 	"monto_base"	REAL NOT NULL,
+    "nombre_garante"	TEXT NOT NULL,
 	"telefono_garante"	TEXT NOT NULL,
 	"direccion_garante"	TEXT NOT NULL,
 	"judiciales"	INTEGER NOT NULL,
@@ -96,12 +97,13 @@ class Cuentas_Personas:
 
 
 class Creditos:
-     def __init__(self,cuenta,cuotas,productos,monto_base,telefono_garante,direccion_garante,judiciales,estado):
+     def __init__(self,cuenta,cuotas,productos,monto_base,nombre_garante,telefono_garante,direccion_garante,judiciales,estado):
         self.credito=None
         self.cuenta=cuenta
         self.cuotas=cuotas
         self.productos=productos
         self.monto_base=monto_base
+        self.nombre_garante=nombre_garante
         self.telefono_garante=telefono_garante
         self.direccion_garante=direccion_garante
         self.judiciales=judiciales
@@ -109,7 +111,7 @@ class Creditos:
        
 
      def __str__(self):
-        return f'Creditos[{self.cuenta},{self.cuotas},{self.productos},{self.monto_base},{self.telefono_garante},{self.direccion_garante},{self.judiciales},{self.estado}]'
+        return f'Creditos[{self.cuenta},{self.cuotas},{self.productos},{self.monto_base},{self.nombre_garante},{self.telefono_garante},{self.direccion_garante},{self.judiciales},{self.estado}]'
 
 class Fechas_Vencimiento:
     def __init__(self,fecha,monto_base,estado,al_dia,cuenta,credito):
@@ -187,8 +189,8 @@ def guardar_datos_cuentas(Cuentas_Personas):
 def guardar_datos_creditos(Creditos):
     conexion=ConexionDB()
 
-    sql=f"""INSERT INTO creditos (cuenta,cuotas,productos,monto_base,telefono_garante,direccion_garante,judiciales,estado)
-    VALUES ('{Creditos.cuenta}','{Creditos.cuotas}','{Creditos.productos}','{Creditos.monto_base}','{Creditos.telefono_garante}','{Creditos.direccion_garante}','{Creditos.judiciales}','{Creditos.estado}')
+    sql=f"""INSERT INTO creditos (cuenta,cuotas,productos,monto_base,nombre_garante,telefono_garante,direccion_garante,judiciales,estado)
+    VALUES ('{Creditos.cuenta}','{Creditos.cuotas}','{Creditos.productos}','{Creditos.monto_base}','{Creditos.nombre_garante}','{Creditos.telefono_garante}','{Creditos.direccion_garante}','{Creditos.judiciales}','{Creditos.estado}')
     
     """
      
@@ -239,7 +241,7 @@ def busquedadni(dni):
     lista_cliente=[]
     try:
         
-        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE dni like '%{dni}%' AND estado =1"""
+        sql=f""" SELECT id_cuenta,nombre,contacto_telefono,contacto_direccion FROM cuentas WHERE dni='{dni}' """
         conexion.cursor.execute(sql)
         lista_cliente=conexion.cursor.fetchall()
         conexion.cerrar()
@@ -252,23 +254,19 @@ def busquedadni(dni):
            return lista_cliente
 
     
-def fin_credito(id_cliente):
-    conexion=ConexionDB()
-    sql_2=f"""update datos_clientes set estado=0 where id_clientes='{id_cliente}'
-    """
+#def fin_credito(id_credito):
+ #   conexion=ConexionDB()
     
-    
-    conexion.cursor.execute(sql_2)
-    conexion.cerrar()
+  #  conexion.cerrar()
 
 
-def busquedanombre(nombre):
+def busquedacuenta(cuenta):
     lista_cliente=[]
     try:
         conexion=ConexionDB()
         
-        variable="%"
-        sql=f""" SELECT id_clientes,nombre, producto FROM datos_clientes WHERE nombre like '%{nombre}%' AND estado =1
+        
+        sql=f""" SELECT nombre,dni,contacto_telefono,contacto_direccion producto FROM cuentas WHERE id_cuenta='{cuenta}'
     """
         conexion.cursor.execute(sql)
         lista_cliente =conexion.cursor.fetchall()
@@ -277,8 +275,8 @@ def busquedanombre(nombre):
        
 
     except:
-         titulo=" error al buscar credito"
-         mensaje= "el nombre ingresado no esta asociado a ningún credito" 
+         titulo=" error al buscar cuenta"
+         mensaje= "el numero de cuenta no esta asociado a ningún cliente" 
          messagebox.showerror(titulo,mensaje)
          return lista_cliente
 
@@ -286,27 +284,21 @@ def busquedanombre(nombre):
 def faltante_pagar(ide):
     conexion=ConexionDB()
 
-    sql=f"""SELECT monto_base,al_dia FROM fecha_vencimientos WHERE idcliente='{ide}' AND estado=1"""
+    sql=f"""SELECT monto_base,al_dia FROM fechas_pagos WHERE credito='{ide}' AND estado=1"""
     total=0.0
     conexion.cursor.execute(sql)
-    algo=[]
-    algo=conexion.cursor.fetchall()
-    
-    
-    cuotas_restantes=len(algo)
-    """if (cuotas_restantes==0):
-        cuotas_restantes=cuotas"""
-        
-    
-    
-    if (lista_vacia(algo)== False ):
+    lista_credito_a_eliminar=[]
+    lista_credito_a_eliminar=conexion.cursor.fetchall()
+    auxiliar=[]
+    cuotas_restantes=len(lista_credito_a_eliminar)    
+    if (lista_vacia(lista_credito_a_eliminar)== False ):
             
            for i in range(cuotas_restantes):
-                algo_1=algo[i]
-                algo_2=list(algo_1)
-                al_dia=algo_2[1]
-                monto=algo_2[0]
-                if(al_dia):
+                auxiliar=list(lista_credito_a_eliminar[i])
+                
+                al_dia=auxiliar[1]
+                monto=auxiliar[0]
+                if(al_dia==1):
                  total=total+monto
                 else: 
                     total=total+monto*1.13
@@ -318,12 +310,48 @@ def faltante_pagar(ide):
         return 0
 def lista_vacia(lista):
         return not lista
-
-
-def borrar_cliente(ide):
-    fin_credito(ide)
+def buscar_datos(cuenta):
     conexion=ConexionDB()
-    sql_1=f"""update fecha_vencimientos set estado=0 where idcliente='{ide}'
+    lista_cliente=[]
+    sql=f"""SELECT nombre,dni,contacto_telefono,contacto_direccion FROM cuentas WHERE id_cuenta='{cuenta}'"""
+    conexion.cursor.execute(sql)
+    lista_cliente =list(conexion.cursor.fetchone())
+    
+    return lista_cliente
+def enviar_credito_a_judiciales(ide_credito):
+    conexion=ConexionDB()
+    sql=f"""update creditos set judiciales=1 where credito='{ide_credito}'  """
+    conexion.cursor.execute(sql)
+    conexion.cerrar()
+def buscar_id(ide):
+        conexion=ConexionDB()
+        sql=f"""SELECT cuenta,productos,telefono_garante,direccion_garante,nombre_garante FROM creditos WHERE credito='{ide}' AND estado=1"""
+        conexion.cursor.execute(sql)
+        lista_cliente_a_eliminar=[]
+        lista_cliente_a_eliminar=list(conexion.cursor.fetchall())
+        conexion.cerrar()
+        return (lista_cliente_a_eliminar)
+def actualizar_pagos():
+    conexion=ConexionDB()
+    fecha_actual=datetime.datetime.now()
+    fecha_actual=datetime.datetime.strftime(fecha_actual,"%Y/%m/%d")
+    sql=f"""update fechas_pagos set al_dia=0 where fecha<'{fecha_actual}' AND estado=1 """
+    conexion.cursor.execute(sql)
+    conexion.cerrar()
+    
+def borrar_credito(credito):
+    
+    conexion=ConexionDB()
+
+    sql_2=f"""update creditos set estado=0 where credito='{credito}'
+    """
+    
+    
+   
+    sql_1=f"""update fechas_pagos set estado=0 where credito='{credito}'
     """
     conexion.cursor.execute(sql_1)
+    conexion.cursor.execute(sql_2)
     conexion.cerrar()
+
+

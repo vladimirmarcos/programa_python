@@ -1,5 +1,6 @@
 import tkinter as tk
 from client.gui_app import App
+from models.creditos_dao import actualizar_pagos
 def main():
     ventana = tk.Tk()
     ventana.geometry("800x800")
@@ -8,4 +9,5 @@ def main():
 
 
 if __name__=='__main__':
+    actualizar_pagos()
     main()

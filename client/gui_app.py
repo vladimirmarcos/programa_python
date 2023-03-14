@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox,Menu
-from ventanas.creacion_frame import frame_inicio,frame_eliminar_credito,frame_busqueda_nombre,frame_busqueda_dni,frame_mensajes,frame_informe_A,frame_informe_B,frame_pagos,frame_cuenta_nueva,frame_nuevo_credito
+from ventanas.creacion_frame import frame_inicio,frame_eliminar_credito,frame_busqueda_cuenta,frame_busqueda_dni,frame_mensajes,frame_informe_A,frame_informe_B,frame_pagos,frame_cuenta_nueva,frame_nuevo_credito,fram_enviar_a_judiciales
 
 class App(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -14,12 +14,12 @@ class App(tk.Frame):
         self.menu_inicio.add_command(label="eliminar Credito",command=self.crear_frame_eliminar)
         self.menu_inicio.add_command(label="Crear cuenta Nueva",command=self.crear_frame_nueva_cuenta)
         self.menu_inicio.add_command(label="Crear nuevo credito",command=self.crear_frame_nuevo_credito)
-        
+        self.menu_inicio.add_command(label="Enviar credito a Judiciales",command=self.enviar_credito_a_judiciales)
         
         self.menu_buscar = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Buscar", menu=self.menu_buscar)
         self.menu_buscar.add_command(label="Buscar por DNI",command=self.crear_frame_busqueda_dni)
-        self.menu_buscar.add_command(label="Buscar por Nombre",command=self.crear_frame_busqueda_nombre)
+        self.menu_buscar.add_command(label="Buscar por cuenta",command=self.crear_frame_busqueda_cuenta)
         parent.config(menu=self.menu)
 
         self.menu_pagos = tk.Menu(self.menu, tearoff=0)
@@ -68,6 +68,13 @@ class App(tk.Frame):
         if self._frame is None:
             self._frame = frame_eliminar_credito(self)
 
+    def enviar_credito_a_judiciales(self):
+        if self._frame is not None:
+            self._frame.borrar()
+            self._frame = None
+        if self._frame is None:
+            self._frame = fram_enviar_a_judiciales(self)
+
     def crear_frame_busqueda_dni(self):
             if self._frame is not None:
                 self._frame.borrar()
@@ -76,12 +83,12 @@ class App(tk.Frame):
                 self._frame = frame_busqueda_dni(self)
 
 
-    def crear_frame_busqueda_nombre(self):
+    def crear_frame_busqueda_cuenta(self):
             if self._frame is not None:
                 self._frame.borrar()
                 self._frame = None
             if self._frame is None:
-                self._frame = frame_busqueda_nombre(self)
+                self._frame = frame_busqueda_cuenta(self)
 
 
     def crear_frame_pagos(self):
